@@ -6,7 +6,7 @@
 
 const DECK = [
   // --- REAL MAD GAB CLASSICS ---
-  { g: "Easel Aid Ease Man", a: "He's a lady's man", c: "Classic", hint: "A charming fellow" },
+  { g: "Easel Aid Ease Man", a: "He's a ladies' man", c: "Classic", hint: "A charming fellow" },
   { g: "Know Sayer", a: "Nose hair", c: "Classic", hint: "Something you trim" },
   { g: "Ease Ace Life Ox", a: "He's a sly fox", c: "Classic", hint: "Sneaky person" },
   { g: "Eye Pillow Fizz Sigh", a: "Apple of his eye", c: "Idiom", hint: "Someone dearly cherished" },
@@ -86,7 +86,7 @@ const DECK = [
   { g: "Spider Man No Way Home", a: "Spider-Man: No Way Home", c: "Movies", hint: "Multiverse web slinger" },
   { g: "The Lion King", a: "The Lion King", c: "Movies", hint: "Simba's circle of life" },
   { g: "Jur Ass Sick Park", a: "Jurassic Park", c: "Movies", hint: "Dinosaurs running loose" },
-  { g: "Lord Of The Rings", a: "Lord of the Rings", c: "Movies", hint: "Journey to Mordor" },
+  { g: "Law Duff There Inks", a: "Lord of the Rings", c: "Movies", hint: "Journey to Mordor" },
   { g: "Back To The Few Chore", a: "Back to the Future", c: "Movies", hint: "Marty and Doc in a DeLorean" },
   { g: "Ghost Bust Hers", a: "Ghostbusters", c: "Movies", hint: "Who you gonna call?" },
   { g: "Barbie World", a: "Barbie world", c: "Pop Culture", hint: "Life in plastic, it's fantastic" },
@@ -135,7 +135,107 @@ const DECK = [
   { g: "Tea Spill", a: "Spill the tea", c: "Slang", hint: "Share the juicy gossip" },
   { g: "Ghosting", a: "Ghosting", c: "Slang", hint: "Disappearing without replying" },
   { g: "Vibe Check", a: "Vibe check", c: "Slang", hint: "Assessing the room's energy" },
-  { g: "Broke The Internet", a: "Broke the internet", c: "Slang", hint: "Viral sensation frenzy" }
+  { g: "Broke The Internet", a: "Broke the internet", c: "Slang", hint: "Viral sensation frenzy" },
+
+  // --- IMPORTED FLASHCARDS ---
+  { g: "Abe Odd Hull Luck Oak", a: "A bottle of Coke", c: "Food" },
+  { g: "Ape Arrows Uncle As His", a: "A pair of sunglasses", c: "Everyday" },
+  { g: "Canoe Key Pace He Grit", a: "Can you keep a secret?", c: "Everyday" },
+  { g: "Date Roy Pea Stuns", a: "Detroit Pistons", c: "Sports" },
+  { g: "Dawn Dude Rugs", a: "Don't do drugs", c: "Everyday" },
+  { g: "Jog Clay Die Scream", a: "Chocolate Ice Cream", c: "Food" },
+  { g: "Moe's Art", a: "Mozart", c: "Music" },
+  { g: "My Kojak Sun", a: "Michael Jackson", c: "Music" },
+  { g: "Pie Rate Softy Care Hip Been", a: "Pirates of the Caribbean", c: "Movies" },
+  { g: "Sand Tack Laws", a: "Santa Claus", c: "Pop Culture" },
+  { g: "Thick Awe Loved Hoot He", a: "The Call of Duty", c: "Games" },
+  { g: "Thick Hull Foam Heck Sicko", a: "The Gulf of Mexico", c: "Places" },
+  { g: "Day Fed Peck Calm", a: "David Beckham", c: "Sports" },
+  { g: "Hair Rose Myth", a: "Aerosmith", c: "Music" },
+  { g: "Caress Peak Reamed Hone Huts", a: "Krispy Kreme Doughnuts", c: "Food" },
+  { g: "Is Bunch Pops Queer Pans", a: "SpongeBob SquarePants", c: "Movies" },
+  { g: "Wand Doll Iran Dense Hence", a: "One Dollar and Ten Cents", c: "Everyday" },
+  { g: "Sit Jerk Lock", a: "Set Your Clock", c: "Everyday" },
+  { g: "Paw Rolfe Eye Owe Lay Shun", a: "Parole Violation", c: "Everyday" },
+  { g: "I'm Issues Home Hutch", a: "I Miss You So Much", c: "Everyday" },
+  { g: "Finesse Aah Wheel Yams", a: "Vanessa Williams", c: "Music" },
+  { g: "Dawn Dutch Mice Tough", a: "Don't Touch My Stuff", c: "Everyday" },
+  { g: "Bat Tree Snot Ink Looted", a: "Batteries Not Included", c: "Movies" },
+  { g: "Ease Sung Gopher", a: "He's Hungover", c: "Everyday" },
+  { g: "High Dance Eek", a: "Hide and Seek", c: "Games" },
+  { g: "Maid Fur Reach Hover", a: "Made for Each Other", c: "Idiom" },
+  { g: "Pomp Eyelet", a: "Palm Pilot", c: "Technology" },
+  { g: "Thief Act Huff Them Adder", a: "The Fact of the Matter", c: "Idiom" },
+  { g: "Whole Imp Pig Aims", a: "Olympic Games", c: "Sports" },
+  { g: "Tray Sure Aisle Hand", a: "Treasure Island", c: "Places" },
+  { g: "Police Bees Eerie Us", a: "Please Be Serious", c: "Everyday" },
+  { g: "Lee On Hard Odie Cap Rio", a: "Leonardo DiCaprio", c: "Pop Culture" },
+  { g: "Frumps Hero Dues Hicks Tee", a: "From Zero to Sixty", c: "Everyday" },
+  { g: "Canoes He Wad Ice He", a: "Can You See What I See?", c: "Everyday" },
+  { g: "Eighth Reap Ease Hoot", a: "A Three-Piece Suit", c: "Everyday" },
+  { g: "Hugh Essay Tude Hay", a: "USA Today", c: "Pop Culture" },
+  { g: "Mare Itch Prop Owes All", a: "Marriage Proposal", c: "Everyday" },
+  { g: "Raw Key Ant Bull Wink Hill", a: "Rocky and Bullwinkle", c: "Movies" },
+  { g: "These Hound Doff Moo Sick", a: "The Sound of Music", c: "Movies" },
+  { g: "Watts Ford Inner", a: "What's for Dinner", c: "Food" },
+  { g: "She Cargo Ill Annoy", a: "Chicago, Illinois", c: "Places" },
+  { g: "Eye Ham Width Stew Ped", a: "I Am with Stupid", c: "Everyday" },
+  { g: "Gay Duds Hun", a: "Kate Hudson", c: "Pop Culture" },
+  { g: "Joan Hay Myth", a: "Joe Namath", c: "Sports" },
+  { g: "We Knit Train Sip Oars", a: "When It Rains, It Pours", c: "Idiom" },
+  { g: "Manna Cue Her", a: "Manicure", c: "Everyday" },
+  { g: "Newer Leans Ain'ts", a: "New Orleans Saints", c: "Sports" },
+  { g: "Read Hick Yule Us", a: "Ridiculous", c: "Tough Word" },
+  { g: "Theme Ask Cough Sore Owe", a: "The Mask of Zorro", c: "Movies" },
+  { g: "Gnu Your Cassidy", a: "New York City", c: "Places" },
+  { g: "Holes Ale Pry Says", a: "Wholesale Prices", c: "Everyday" },
+  { g: "Eight Up Aware Par Tee", a: "A Tupperware Party", c: "Everyday" },
+  { g: "I'm On Stairs Sink", a: "Monsters, Inc.", c: "Movies" },
+  { g: "Hoop Side Hid Ditto Ken", a: "Oops! I Did It Again", c: "Music" },
+  { g: "Mine Ore A Teary Port", a: "Minority Report", c: "Movies" },
+  { g: "Rot Into Thick Oar", a: "Rotten to the Core", c: "Idiom" },
+  { g: "Thesis Sawn Who Tomb He", a: "This Is All New to Me", c: "Everyday" },
+  { g: "Thy Pup Dispelled Chews", a: "Wipe Up the Spilled Juice", c: "Everyday" },
+  { g: "Thief Wrench Con Eggs Shun", a: "The French Connection", c: "Movies" },
+  { g: "Sea Yule Hater", a: "See You Later", c: "Everyday" },
+  { g: "Old Sunned Wins", a: "Olsen Twins", c: "Pop Culture" },
+  { g: "Manner Four", a: "Man-of-War", c: "Animal" },
+  { g: "Who Why Inn Sir Fur", a: "Hawaiian Surfer", c: "Everyday" },
+  { g: "Fun Ella Eyes", a: "Vanilla Ice", c: "Music" },
+  { g: "Deep Rinse Soft Ides", a: "The Prince of Tides", c: "Movies" },
+  { g: "Hay Tease Hicks", a: "Eighty-Six", c: "Everyday" },
+  { g: "Jeweler Rob Hurts", a: "Julia Roberts", c: "Pop Culture" },
+  { g: "Minnie Soda Vie Kinks", a: "Minnesota Vikings", c: "Sports" },
+  { g: "Seal Indy Yon", a: "Celine Dion", c: "Music" },
+  { g: "Thigh Sing Gone Thick Ache", a: "The Icing on the Cake", c: "Idiom" },
+  { g: "Why Emcee Hay", a: "YMCA", c: "Music" },
+  { g: "Theme Are Ink Ore", a: "The Marine Corps", c: "Pop Culture" },
+  { g: "Poise Tomb Hen", a: "Boyz II Men", c: "Music" },
+  { g: "Mar Thus Do Hurt", a: "Martha Stewart", c: "Pop Culture" },
+  { g: "Duck Turd Ray", a: "Dr. Dre", c: "Music" },
+  { g: "Gown Tink Rows", a: "Counting Crows", c: "Music" },
+  { g: "Hum Eric A Nair Lions", a: "American Airlines", c: "Travel" },
+  { g: "May Cuss Suck Jest Chin", a: "Make a Suggestion", c: "Everyday" },
+  { g: "Par Keens Pace", a: "Parking Space", c: "Everyday" },
+  { g: "Rome He Owe Hand Jewelry Yet", a: "Romeo and Juliet", c: "Movies" },
+  { g: "Thief Han Tomb Hen Is", a: "The Phantom Menace", c: "Movies" },
+  { g: "Wide Hidden Chews Haze Hoe", a: "Why Didn't You Say So?", c: "Everyday" },
+  { g: "Tap Lloyd Noose Pay Purse", a: "Tabloid Newspapers", c: "Pop Culture" },
+  { g: "Fee Nicks Huns", a: "Phoenix Suns", c: "Sports" },
+  { g: "Hit Stoop Add", a: "It's Too Bad", c: "Everyday" },
+  { g: "May Churl Eek Bays Paul", a: "Major League Baseball", c: "Sports" },
+  { g: "Poe Little Key Ink Oar Wrecked", a: "Politically Incorrect", c: "Idiom" },
+  { g: "Sue Purse Eye Smee", a: "Super Size Me", c: "Movies" },
+  { g: "Wall Come Island Mash Ooze", a: "Walk a Mile in My Shoes", c: "Idiom" },
+  { g: "Pen Silly Raise Her", a: "Pencil Eraser", c: "Everyday" },
+  { g: "June Hoe Hull Ask Her", a: "Juneau, Alaska", c: "Places" },
+  { g: "For Dee Hay Towers", a: "48 Hours", c: "Movies" },
+  { g: "Deep Each Poise", a: "The Beach Boys", c: "Music" },
+  { g: "Hoe Min Proof Mint", a: "Home Improvement", c: "Movies" },
+  { g: "Mash Who Sun Tide", a: "My Shoe's Untied", c: "Everyday" },
+  { g: "Prints Jar Else", a: "Prince Charles", c: "Pop Culture" },
+  { g: "Toy Ordor Terse Sell", a: "Toyota Tercel", c: "Everyday" },
+  { g: "Wren Tough Id He Owe", a: "Rent a Video", c: "Everyday" }
 ];
 
 // Helper to shuffle a copy of the deck
@@ -154,11 +254,16 @@ function getShuffledDeck(categoryFilter = null, limit = null) {
   return pool;
 }
 
+function getDeckCategories() {
+  return [...new Set(DECK.map(card => card.c))].sort((a, b) => a.localeCompare(b));
+}
+
 if (typeof window !== "undefined") {
   window.DECK = DECK;
   window.getShuffledDeck = getShuffledDeck;
+  window.getDeckCategories = getDeckCategories;
 }
 
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { DECK, getShuffledDeck };
+  module.exports = { DECK, getShuffledDeck, getDeckCategories };
 }

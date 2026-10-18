@@ -212,9 +212,27 @@
           <button class="seg-btn" data-l="35">35</button>
           <button class="seg-btn" data-l="all">All</button>
         </div>
+
+        <label class="panel-hd deck-category-label" for="categorySelect">🗂️ Card category</label>
+        <p class="panel-sub">Choose a category or shuffle cards from every category.</p>
+        <select class="category-select" id="categorySelect" aria-label="Card category">
+          <option value="All">Shuffle all cards</option>
+        </select>
       </div>
 
     </div>
+
+    <section class="glass history-panel" aria-labelledby="historyHeading">
+      <div class="history-heading-row">
+        <div>
+          <h3 class="panel-hd" id="historyHeading">🏆 Team history</h3>
+          <p class="panel-sub">Wins and recent completed games are saved on this device.</p>
+        </div>
+      </div>
+      <p class="history-status" id="historyStatus" aria-live="polite"></p>
+      <div class="team-records" id="teamRecords"></div>
+      <ol class="recent-games" id="recentGames"></ol>
+    </section>
 
     <div class="setup-start">
       <button class="btn btn-mega" id="btnStart">🚀 Start the Show</button>

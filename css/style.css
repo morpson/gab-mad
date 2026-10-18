@@ -723,6 +723,26 @@ body {
   box-shadow: 0 0 12px var(--seafoam-glow);
 }
 
+.team-avatar-select {
+  flex: 0 0 auto;
+  max-width: 104px;
+  padding: 7px 9px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-pill);
+  background: rgba(255,255,255,.07);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.team-avatar-select option,
+.category-select option {
+  background: #121629;
+  color: var(--ink);
+}
+
 .team-swatch {
   width: 16px; height: 16px;
   border-radius: 50%;
@@ -731,6 +751,7 @@ body {
 
 .team-inp {
   flex: 1;
+  min-width: 0;
   background: transparent;
   border: none;
   color: var(--ink);
@@ -741,6 +762,90 @@ body {
 }
 
 .team-inp::placeholder { color: var(--ink-3); }
+
+.deck-category-label { margin-top: 6px; }
+
+.category-select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-md);
+  background: rgba(255,255,255,.07);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+.category-select:focus-visible,
+.team-avatar-select:focus-visible {
+  outline: 2px solid var(--seafoam);
+  outline-offset: 3px;
+}
+
+.history-panel {
+  padding: 20px;
+}
+
+.history-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.history-heading-row .panel-sub { margin-top: 4px; }
+
+.history-status {
+  color: var(--pink);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.history-status:empty { display: none; }
+
+.team-records {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.record-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-pill);
+  background: rgba(255,255,255,.05);
+  font-size: .82rem;
+}
+
+.record-chip > span:last-child {
+  color: var(--ink-2);
+}
+
+.history-empty {
+  color: var(--ink-3);
+  font-size: .88rem;
+}
+
+.recent-games {
+  display: grid;
+  gap: 7px;
+  padding: 12px 0 0 22px;
+  border-top: 1px solid var(--surface-border);
+  color: var(--ink-2);
+  font-size: .82rem;
+}
+
+.recent-games:empty { display: none; }
+
+.team-avatar {
+  flex: 0 0 auto;
+  font-size: 1.15rem;
+  line-height: 1;
+}
 
 /* Start section */
 .setup-start {
@@ -1349,6 +1454,9 @@ button:focus-visible {
   .action-bar { gap: 7px; }
   .action-bar .btn { padding: 10px 14px; font-size: .83rem; }
   .setup-grid { grid-template-columns: 1fr; }
+  .team-row { padding: 8px 11px; gap: 8px; }
+  .team-avatar-select { max-width: 94px; padding: 7px 6px; }
+  .history-panel { padding: 16px; }
 }
 
 /* ==========================================================================

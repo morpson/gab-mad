@@ -12,13 +12,54 @@ const TEAM_DEFAULTS = [
   { name: "The Purple Haze",    color: "#d946ef" }
 ];
 
+const TEAM_AVATARS = [
+  { emoji: "", label: "No avatar" },
+  { emoji: "🦊", label: "Fox" },
+  { emoji: "🐸", label: "Frog" },
+  { emoji: "🦄", label: "Unicorn" },
+  { emoji: "🐙", label: "Octopus" },
+  { emoji: "🦉", label: "Owl" },
+  { emoji: "🐼", label: "Panda" },
+  { emoji: "🦖", label: "Dinosaur" }
+];
+
+const HISTORY_STORAGE_KEY = "gabmad_team_history";
+
+function loadHistoryStore() {
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (!raw) return { teams: {}, games: [], error: "" };
+    const saved = JSON.parse(raw);
+    if (!saved || !saved.teams || typeof saved.teams !== "object" ||
+        Array.isArray(saved.teams) || !Array.isArray(saved.games)) {
+      throw new Error("Saved history has an unexpected format.");
+    }
+    const games = saved.games.filter(game =>
+      game && typeof game.playedAt === "string" &&
+      Array.isArray(game.winners) && Array.isArray(game.teams)
+    ).slice(0, 25);
+    return { teams: Object.assign(Object.create(null), saved.teams), games, error: "" };
+  } catch (error) {
+    console.error("Unable to load GabMad team history.", error);
+    return {
+      teams: {},
+      games: [],
+      error: "Saved history couldn't be read. New results won't overwrite it."
+    };
+  }
+}
+
+const savedHistory = loadHistoryStore();
+
 /* ── STATE ──────────────────────────────────── */
 const state = {
   screen:      "intro",
   teamCount:   2,
   timerSecs:   60,
   cardLimit:   20,
+  category:    "All",
   teams:       [],
+  teamDrafts:  [],
   deck:        [],
   idx:         0,
   phase:       "gab",    // "gab" | "reveal"
@@ -27,6 +68,9 @@ const state = {
   paused:      false,
   timeUp:      false,
   hintTier:    0,
+  historyTeams: savedHistory.teams,
+  historyGames: savedHistory.games,
+  historyError: savedHistory.error,
   theme:       localStorage.getItem("gabmad_theme") || "dark"
 };
 
@@ -112,11 +156,21 @@ function showScreen(name) {
 function renderTeamInputs() {
   const list = $("teamsList");
   if (!list) return;
+  Array.from(list.children).forEach((row, i) => {
+    const input = row.querySelector(".team-inp");
+    const avatar = row.querySelector(".team-avatar-select");
+    if (input && avatar) {
+      state.teamDrafts[i] = { name: input.value, avatar: avatar.value };
+    }
+  });
+
   list.innerHTML = "";
   for (let i = 0; i < state.teamCount; i++) {
     const def = TEAM_DEFAULTS[i];
+    const draft = state.teamDrafts[i] || { name: def.name, avatar: "" };
     const row = document.createElement("div");
     row.className = "team-row";
+    row.dataset.teamIndex = i;
 
     const sw = document.createElement("span");
     sw.className = "team-swatch";
@@ -127,14 +181,150 @@ function renderTeamInputs() {
     inp.type = "text";
     inp.className = "team-inp";
     inp.maxLength = 24;
-    inp.value = def.name;
+    inp.value = draft.name || def.name;
     inp.id = `tinp${i}`;
     inp.setAttribute("aria-label", `Team ${i + 1} name`);
 
+    const avatar = document.createElement("select");
+    avatar.className = "team-avatar-select";
+    avatar.id = `tavatar${i}`;
+    avatar.setAttribute("aria-label", `Team ${i + 1} avatar`);
+    TEAM_AVATARS.forEach(option => {
+      const item = document.createElement("option");
+      item.value = option.emoji;
+      item.textContent = option.emoji ? `${option.emoji} ${option.label}` : option.label;
+      avatar.appendChild(item);
+    });
+    avatar.value = draft.avatar || "";
+
     row.appendChild(sw);
+    row.appendChild(avatar);
     row.appendChild(inp);
     list.appendChild(row);
   }
+}
+
+function populateCategoryOptions() {
+  const select = $("categorySelect");
+  if (!select) return;
+  select.replaceChildren();
+
+  const allOption = document.createElement("option");
+  allOption.value = "All";
+  allOption.textContent = `Shuffle all cards (${DECK.length})`;
+  select.appendChild(allOption);
+
+  getDeckCategories().forEach(category => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = `${category} (${DECK.filter(card => card.c === category).length})`;
+    select.appendChild(option);
+  });
+  select.value = state.category;
+}
+
+function teamHistoryKey(name) {
+  return name.trim().toLocaleLowerCase();
+}
+
+function saveHistoryStore() {
+  if (state.historyError) return;
+  try {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify({
+      teams: state.historyTeams,
+      games: state.historyGames
+    }));
+  } catch (error) {
+    console.error("Unable to save GabMad team history.", error);
+    state.historyError = "History couldn't be saved. Check this browser's storage settings.";
+  }
+}
+
+function renderTeamHistory() {
+  const records = $("teamRecords");
+  const games = $("recentGames");
+  const status = $("historyStatus");
+  if (!records || !games || !status) return;
+
+  status.textContent = state.historyError;
+  records.replaceChildren();
+  games.replaceChildren();
+
+  const sortedRecords = Object.values(state.historyTeams)
+    .filter(record => record && typeof record.name === "string")
+    .sort((a, b) => (b.wins || 0) - (a.wins || 0) || (b.games || 0) - (a.games || 0));
+
+  if (!sortedRecords.length && !state.historyGames.length) {
+    const empty = document.createElement("p");
+    empty.className = "history-empty";
+    empty.textContent = "No completed games yet. Your team records will show up here.";
+    records.appendChild(empty);
+    return;
+  }
+
+  sortedRecords.slice(0, 8).forEach(record => {
+    const chip = document.createElement("div");
+    chip.className = "record-chip";
+    if (record.avatar) {
+      const avatar = document.createElement("span");
+      avatar.className = "team-avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = record.avatar;
+      chip.appendChild(avatar);
+    }
+    const name = document.createElement("strong");
+    name.textContent = record.name;
+    const stats = document.createElement("span");
+    stats.textContent = `${record.wins || 0} ${record.wins === 1 ? "win" : "wins"} · ${record.games || 0} games`;
+    chip.append(name, stats);
+    records.appendChild(chip);
+  });
+
+  state.historyGames.slice(0, 5).forEach(game => {
+    const item = document.createElement("li");
+    const date = new Date(game.playedAt);
+    const dateLabel = Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString();
+    const winners = game.winners.filter(name => typeof name === "string").join(" & ") || "No winner";
+    const result = Array.isArray(game.teams)
+      ? game.teams.filter(team => team && typeof team.name === "string")
+        .map(team => `${team.name} ${team.score}`).join(" · ")
+      : "";
+    item.textContent = `${dateLabel} — ${winners} won${result ? ` (${result})` : ""}`;
+    games.appendChild(item);
+  });
+}
+
+function recordCompletedGame() {
+  const topScore = Math.max(...state.teams.map(team => team.score));
+  const winners = state.teams.filter(team => team.score === topScore).map(team => team.name);
+
+  state.teams.forEach(team => {
+    const key = teamHistoryKey(team.name);
+    const record = Object.hasOwn(state.historyTeams, key) ? state.historyTeams[key] : {
+      name: team.name,
+      avatar: team.avatar,
+      color: team.color,
+      wins: 0,
+      games: 0,
+      points: 0
+    };
+    record.name = team.name;
+    record.avatar = team.avatar;
+    record.color = team.color;
+    record.games = (record.games || 0) + 1;
+    record.points = (record.points || 0) + team.score;
+    if (winners.includes(team.name)) record.wins = (record.wins || 0) + 1;
+    state.historyTeams[key] = record;
+  });
+
+  state.historyGames.unshift({
+    playedAt: new Date().toISOString(),
+    winners,
+    teams: state.teams.map(({ name, avatar, score }) => ({ name, avatar, score }))
+  });
+  state.historyGames = state.historyGames.slice(0, 25);
+  saveHistoryStore();
+  renderTeamHistory();
 }
 
 function bindSetup() {
@@ -166,6 +356,11 @@ function bindSetup() {
     if (window.gabAudio) window.gabAudio.click();
   });
 
+  $("categorySelect").addEventListener("change", e => {
+    state.category = e.target.value;
+    if (window.gabAudio) window.gabAudio.click();
+  });
+
   $("btnStart").addEventListener("click", () => {
     if (window.gabAudio) { window.gabAudio.getContext(); window.gabAudio.fanfare(); }
     startGame();
@@ -178,9 +373,15 @@ function startGame() {
   for (let i = 0; i < state.teamCount; i++) {
     const inp = $(`tinp${i}`);
     const nm = (inp && inp.value.trim()) ? inp.value.trim() : TEAM_DEFAULTS[i].name;
-    state.teams.push({ name: nm, color: TEAM_DEFAULTS[i].color, score: 0 });
+    const avatar = $(`tavatar${i}`);
+    state.teams.push({
+      name: nm,
+      avatar: avatar ? avatar.value : "",
+      color: TEAM_DEFAULTS[i].color,
+      score: 0
+    });
   }
-  state.deck = getShuffledDeck(null, state.cardLimit);
+  state.deck = getShuffledDeck(state.category, state.cardLimit);
   state.idx = 0;
 
   renderHUD();
@@ -410,6 +611,14 @@ function buildScoreGrid() {
     const info = document.createElement("div");
     info.className = "score-info";
 
+    if (t.avatar) {
+      const avatar = document.createElement("span");
+      avatar.className = "team-avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = t.avatar;
+      info.appendChild(avatar);
+    }
+
     const dot = document.createElement("span");
     dot.className = "chip-dot";
     dot.style.background = t.color;
@@ -462,6 +671,14 @@ function renderHUD() {
     const chip = document.createElement("div");
     chip.className = "team-chip" + (t.score === max && max > 0 ? " leader" : "");
 
+    if (t.avatar) {
+      const avatar = document.createElement("span");
+      avatar.className = "team-avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = t.avatar;
+      chip.appendChild(avatar);
+    }
+
     const dot = document.createElement("span");
     dot.className = "chip-dot";
     dot.style.background = t.color;
@@ -487,6 +704,7 @@ function endGame() {
   stopTimer();
   if (window.gabSpeech) window.gabSpeech.stop();
   if (window.gabAudio) { window.gabAudio.setMusicMode("chill"); window.gabAudio.fanfare(); }
+  recordCompletedGame();
 
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
   const top = sorted[0].score;
@@ -512,6 +730,14 @@ function endGame() {
 
     const info = document.createElement("div");
     info.className = "podium-info";
+
+    if (t.avatar) {
+      const avatar = document.createElement("span");
+      avatar.className = "team-avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = t.avatar;
+      info.appendChild(avatar);
+    }
 
     const dot = document.createElement("span");
     dot.className = "chip-dot";
@@ -678,7 +904,7 @@ function bindGame() {
 function bindWinner() {
   $("btnPlayAgain").addEventListener("click", () => {
     state.teams.forEach(t => t.score = 0);
-    state.deck = getShuffledDeck(null, state.cardLimit);
+    state.deck = getShuffledDeck(state.category, state.cardLimit);
     state.idx = 0;
     renderHUD();
     showScreen("game");
@@ -694,7 +920,7 @@ function bindWinner() {
 function bindKeys() {
   document.addEventListener("keydown", e => {
     const tag = (e.target && e.target.tagName) || "";
-    if (tag === "INPUT" || tag === "TEXTAREA") return;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
 
     if (state.screen === "intro") {
       if (e.code === "Enter" || e.code === "ArrowRight") {
@@ -735,5 +961,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindKeys();
   bindSpeech();
   renderTeamInputs();
+  populateCategoryOptions();
+  renderTeamHistory();
   showScreen("intro");
 });
