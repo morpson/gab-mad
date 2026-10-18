@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c0e17" />
+  <meta name="description" content="GabMad - The hilarious phonetic party game where you sound out gibberish to find real phrases!" />
+  <title>GabMad | Party Word Game</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Canvas Confetti Overlay -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="app-container">
+    <!-- Top Navigation & Controls -->
+    <header class="top-nav">
+      <a href="#" class="brand-badge" id="brandHome" aria-label="GabMad Home">
+        <span class="brand-logo">⚡</span>
+        <h1 class="brand-title">GabMad</h1>
+        <span class="brand-tag">Party</span>
+      </a>
+
+      <div class="nav-actions">
+        <!-- How To Play Modal Trigger -->
+        <button type="button" class="btn-icon" id="btnOpenRules" title="How to play" aria-label="How to play rules">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </button>
+
+        <!-- Lo-Fi Beats Toggle -->
+        <button type="button" class="btn-icon active" id="btnToggleMusic" title="Toggle Lo-Fi Beats" aria-label="Toggle Lo-Fi Beats" aria-pressed="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V5l12-2v13"></path>
+            <circle cx="6" cy="18" r="3"></circle>
+            <circle cx="18" cy="16" r="3"></circle>
+          </svg>
+        </button>
+
+        <!-- Sound FX Toggle -->
+        <button type="button" class="btn-icon active" id="btnToggleSfx" title="Toggle Sound Effects" aria-label="Toggle Sound Effects" aria-pressed="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button type="button" class="btn-icon" id="btnToggleTheme" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.5 5.5 0 0 1-7.54-7.54C12.92 3.04 12.46 3 12 3z"></path>
+          </svg>
+        </button>
+
+        <!-- In-game Quit Button (shown during game) -->
+        <button type="button" class="btn-icon" id="btnQuitGame" title="Quit to Setup" aria-label="Quit game" style="display: none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scoreboard HUD Bar (Active during gameplay) -->
+    <div class="scoreboard-hud" id="scoreboardHUD" style="display: none;" role="region" aria-label="Live Team Scores"></div>
+
+    <!-- MAIN SCREENS CONTAINER -->
+    <main>
+      <!-- ==========================================================================
+           1. SETUP SCREEN
+           ========================================================================== -->
+      <section class="screen active" id="setupScreen" aria-label="Game Setup">
+        <div class="setup-hero">
+          <h2 class="setup-title">Sound It Out.<br>Shout It First.</h2>
+          <p class="setup-subtitle">Read the nonsense phrase out loud as fast as you can. When your brain clicks the real words, shout it to score!</p>
+        </div>
+
+        <div class="setup-grid">
+          <!-- Team Selection & Customization -->
+          <div class="panel-card">
+            <div>
+              <h3 class="panel-title">👥 Teams</h3>
+              <p class="panel-subtitle">Choose between 2 to 4 teams</p>
+            </div>
+            
+            <div class="segmented-control" id="teamCountGroup" role="group" aria-label="Number of teams">
+              <button type="button" class="segmented-btn selected" data-count="2">2 Teams</button>
+              <button type="button" class="segmented-btn" data-count="3">3 Teams</button>
+              <button type="button" class="segmented-btn" data-count="4">4 Teams</button>
+            </div>
+
+            <div class="teams-list" id="teamsListContainer"></div>
+          </div>
+
+          <!-- Game Round Options -->
+          <div class="panel-card">
+            <div>
+              <h3 class="panel-title">⏱️ Card Timer</h3>
+              <p class="panel-subtitle">Countdown per card</p>
+            </div>
+
+            <div class="segmented-control" id="timerDurationGroup" role="group" aria-label="Timer Duration">
+              <button type="button" class="segmented-btn" data-secs="30">30s Blitz</button>
+              <button type="button" class="segmented-btn" data-secs="45">45s Fast</button>
+              <button type="button" class="segmented-btn selected" data-secs="60">60s Party</button>
+              <button type="button" class="segmented-btn" data-secs="90">90s Relax</button>
+            </div>
+
+            <div style="margin-top: 10px;">
+              <h3 class="panel-title">🃏 Deck Size</h3>
+              <p class="panel-subtitle">How many cards to play</p>
+            </div>
+
+            <div class="segmented-control" id="cardsLimitGroup" role="group" aria-label="Cards count">
+              <button type="button" class="segmented-btn" data-limit="10">10 Quick</button>
+              <button type="button" class="segmented-btn selected" data-limit="20">20 Standard</button>
+              <button type="button" class="segmented-btn" data-limit="35">35 Party</button>
+              <button type="button" class="segmented-btn" data-limit="all">All Cards</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Start CTA -->
+        <button type="button" class="btn-start-game" id="btnStartGame">
+          <span>🚀 Start the Show</span>
+        </button>
+
+        <div class="quick-rules-bar">
+          <b>Keyboard Controls:</b> [Space] Flip/Next &bull; [H] Hint &bull; [S] Read Aloud &bull; [M] Mic Listen &bull; [P] Pause &bull; [1–4] Score Team
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           2. GAME SCREEN (Stage & 3D Flip Card)
+           ========================================================================== -->
+      <section class="screen" id="gameScreen" aria-label="Game Stage">
+        <!-- Progress Bar & Timer Header -->
+        <div class="game-stage-header">
+          <div class="progress-info">
+            <span id="progressLabel">Card 1 of 20</span>
+            <div class="progress-track">
+              <div class="progress-fill" id="progressFillBar"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timer Countdown Container -->
+        <div class="timer-container">
+          <div class="timer-countdown" id="timerCountdownNum">60</div>
+          <div class="timer-track-bar">
+            <div class="timer-fill-bar" id="timerFillProgress"></div>
+          </div>
+          <div class="timer-actions">
+            <button type="button" class="btn-small-action" id="btnPlusTime" title="Add 15 seconds">+15s</button>
+            <button type="button" class="btn-small-action" id="btnPauseTimer" title="Pause or Resume">⏸ Pause</button>
+          </div>
+        </div>
+
+        <!-- 3D Card Stage -->
+        <div class="card-scene">
+          <div class="card-flipper" id="cardFlipper">
+            <!-- Front Face (Nonsense Phonetic Phrase) -->
+            <div class="card-face card-front">
+              <span class="card-category-badge" id="cardCategoryBadge">Classic</span>
+              <h2 class="card-gibberish-text" id="cardGibberishText">—</h2>
+              <p class="card-instruction-sub">Say it out loud — faster &amp; keep saying it!</p>
+              <div class="hint-display-box" id="hintDisplayBox" aria-live="polite"></div>
+            </div>
+
+            <!-- Back Face (Real Answer) -->
+            <div class="card-face card-back">
+              <span class="card-category-badge">The Answer Is</span>
+              <h2 class="card-answer-text" id="cardAnswerText">—</h2>
+            </div>
+          </div>
+
+          <!-- Time's Up Floating Badge -->
+          <div class="times-up-overlay" id="timesUpOverlay">TIME'S UP!</div>
+        </div>
+
+        <!-- In-Game Action Bar -->
+        <div class="card-actions-bar" id="cardActionsBar">
+          <button type="button" class="btn-game-action" id="btnHint">💡 Hint</button>
+          <button type="button" class="btn-game-action" id="btnSpeakPhonetic" title="Computer reads it aloud">🗣️ Read Aloud</button>
+          <button type="button" class="btn-game-action btn-mic" id="btnListenMic" title="Listen for shout answers">🎙️ Listen</button>
+          <button type="button" class="btn-game-action" id="btnSkipCard">⏭️ Skip</button>
+          <button type="button" class="btn-game-action primary" id="btnRevealAnswer">✨ Reveal Answer</button>
+        </div>
+
+        <p class="mic-status-text" id="micStatusText" aria-live="polite"></p>
+
+        <!-- Scoring Panel (Visible after reveal) -->
+        <div class="scoring-panel" id="scoringPanel">
+          <div class="scoring-header">
+            <h3>Who shouted it first?</h3>
+          </div>
+          <div class="scoring-rows-grid" id="scoringRowsGrid"></div>
+          <div class="scoring-footer-actions">
+            <button type="button" class="btn-game-action" id="btnNobodyScored">❌ Nobody Got It</button>
+            <button type="button" class="btn-game-action primary" id="btnNextCard">Next Card ➡️</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           3. WINNER SCREEN (Podium & Celebration)
+           ========================================================================== -->
+      <section class="screen" id="winnerScreen" aria-label="Game Results">
+        <div class="winner-celebration">
+          <svg class="trophy-svg-icon" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+            <path d="M28 14h44v14c0 14-9 24-22 24s-22-10-22-24V14z" fill="#ffb703" stroke="#e8930c" stroke-width="3"/>
+            <path d="M28 20H14c0 14 7 20 14 21M72 20h14c0 14-7 20-14 21" stroke="#e8930c" stroke-width="4" stroke-linecap="round"/>
+            <rect x="44" y="52" width="12" height="16" fill="#e8930c"/>
+            <rect x="30" y="68" width="40" height="10" rx="3" fill="#ffb703" stroke="#e8930c" stroke-width="2"/>
+            <rect x="22" y="78" width="56" height="12" rx="4" fill="#d97706"/>
+            <polygon points="50,22 53,29 61,30 55,36 57,44 50,40 43,44 45,36 39,30 47,29" fill="#ffffff"/>
+          </svg>
+
+          <h2 class="winner-headline" id="winnerHeadline">Winner!</h2>
+          <p class="winner-recap-text" id="winnerRecapText"></p>
+
+          <div class="podium-standings" id="podiumStandings"></div>
+
+          <div class="winner-nav-buttons">
+            <button type="button" class="btn-game-action" id="btnNewSetup">⚙️ New Settings</button>
+            <button type="button" class="btn-game-action primary" id="btnPlayAgain">🔄 Play Again</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- HOW TO PLAY ACCESSIBLE MODAL -->
+  <dialog class="rules-modal" id="rulesDialog">
+    <div class="rules-modal-header">
+      <h3 class="font-display">How to Play GabMad</h3>
+      <button type="button" class="btn-icon" id="btnCloseRules" aria-label="Close rules">✕</button>
+    </div>
+    <div class="rules-steps">
+      <div class="rule-step-card">
+        <div class="rule-num">1</div>
+        <div class="rule-content">
+          <h4>Read It Out Loud</h4>
+          <p>A nonsense phrase appears on the card (e.g. <em>"Easel Aid Ease Man"</em>). Sound it out fast!</p>
+        </div>
+      </div>
+      <div class="rule-step-card">
+        <div class="rule-num">2</div>
+        <div class="rule-content">
+          <h4>Listen For The Real Words</h4>
+          <p>When you repeat it quickly, phonetics trigger your brain to hear the real phrase (<em>"He's a lady's man"</em>).</p>
+        </div>
+      </div>
+      <div class="rule-step-card">
+        <div class="rule-num">3</div>
+        <div class="rule-content">
+          <h4>Shout It First To Score</h4>
+          <p>First team to shout the correct answer before the timer runs out gets a point!</p>
+        </div>
+      </div>
+      <div class="rule-step-card">
+        <div class="rule-num">4</div>
+        <div class="rule-content">
+          <h4>AI Listening Mode</h4>
+          <p>Tap <strong>Listen</strong> and shout the answer — browser speech recognition will automatically detect it and flip the card!</p>
+        </div>
+      </div>
+    </div>
+    <button type="button" class="btn-start-game" onclick="document.getElementById('rulesDialog').close()">
+      Got It, Let's Play!
+    </button>
+  </dialog>
+
+  <!-- Game Scripts -->
+  <script src="js/deck.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
