@@ -3,10 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#05070f" />
+  <meta name="theme-color" content="#140E06" />
   <meta name="description" content="GabMad — sound out the nonsense phrases and shout the real phrase first!" />
   <title>GabMad — It's MadGab, but free</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+
+  <!-- Favicon: logo PNG -->
+  <link rel="icon" type="image/png" href="logo.PNG" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,6 +17,22 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SPLASH SCREEN — logo video with mix-blend-mode lighten
+     Dismissed on video end OR on tap/click
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="splashScreen" role="presentation" aria-hidden="true">
+  <video
+    id="splashVideo"
+    src="logo.MP4"
+    autoplay
+    muted
+    playsinline
+    preload="auto"
+  ></video>
+  <p class="splash-tap">tap to skip</p>
+</div>
 
 <!-- Animated background blobs -->
 <div class="blob-layer" aria-hidden="true">
@@ -32,18 +50,17 @@
   <!-- ── TOP NAV ────────────────────────────── -->
   <header class="top-nav" id="topNav">
     <a href="#" class="brand" id="brandHome" aria-label="GabMad home">
-      <span class="brand-spark" aria-hidden="true">⚡</span>
-      <span class="brand-name">GabMad</span>
+      <img src="logo.PNG" alt="GabMad" class="brand-logo-img" />
     </a>
 
     <div class="nav-pills">
-      <button class="pill-btn glow-green" id="btnOpenRules" title="How to play" aria-label="How to play">
+      <button class="pill-btn glow-gold" id="btnOpenRules" title="How to play" aria-label="How to play">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/>
         </svg>
       </button>
 
-      <button class="pill-btn glow-green" id="btnToggleMusic" title="Toggle music" aria-label="Toggle lo-fi music" aria-pressed="true">
+      <button class="pill-btn glow-gold" id="btnToggleMusic" title="Toggle music" aria-label="Toggle lo-fi music" aria-pressed="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
         </svg>
@@ -61,7 +78,7 @@
         </svg>
       </button>
 
-      <button class="pill-btn glow-pink" id="btnQuitGame" title="Quit to setup" aria-label="Quit game" style="display:none">
+      <button class="pill-btn" id="btnQuitGame" title="Quit to setup" aria-label="Quit game" style="display:none">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
@@ -73,17 +90,17 @@
   <div class="scoreboard-hud" id="scoreboardHUD" style="display:none" role="region" aria-label="Live scores"></div>
 
   <!-- ═══════════════════════════════════════════
-       INTRO SCREEN
+       INTRO / OVERVIEW SCREEN
        ═══════════════════════════════════════════ -->
-  <section class="screen active screen-enter" id="introScreen" aria-label="Game Introduction">
+  <section class="screen active screen-enter" id="introScreen" aria-label="Game overview">
 
+    <!-- Big logo as hero -->
     <div class="intro-hero">
-      <div class="bubble-deco">
-        <h1 class="intro-game-title">GabMad</h1>
-      </div>
+      <img src="logo.PNG" alt="GabMad" class="intro-logo-img" />
       <p class="intro-game-sub">(it's MadGab, but free)</p>
     </div>
 
+    <!-- Carousel cards -->
     <div class="glass intro-steps-container" id="introStepsWrap">
 
       <!-- Step 0 -->
@@ -92,17 +109,13 @@
         <p class="step-label">Step One</p>
         <h2 class="step-heading">Read the nonsense — out loud, fast</h2>
         <p class="step-body">
-          A card shows you a phrase that looks like absolute gibberish. Your job? Just read it out loud, fast, over and over.<br><br>
-          Like this beauty:<br>
+          A card shows you a phrase that looks like absolute gibberish. Just read it out loud, fast, over and over.
         </p>
         <div class="example-bubble">
           <span class="example-gab">Hiney Duck Hiss</span>
-          <span class="example-arrow">↓ (say it fast…)</span>
+          <span class="example-arrow">↓ say it fast…</span>
           <span class="example-answer">I need a kiss 💋</span>
         </div>
-        <p class="step-body" style="margin-top:8px; font-size:.88rem; color: var(--ink-3)">
-          <em>Every single party has at least one adult yelling that across the room. It's tradition.</em>
-        </p>
       </div>
 
       <!-- Step 1 -->
@@ -111,16 +124,13 @@
         <p class="step-label">Step Two</p>
         <h2 class="step-heading">Your brain clicks. Then you shout.</h2>
         <p class="step-body">
-          Keep repeating it and the sounds will suddenly snap into a real phrase in your head. The moment it clicks — <em>shout it out</em> before anyone else does!
+          Keep repeating it and the sounds snap into a real phrase. The moment it clicks — <em>shout it out</em> before anyone else does!
         </p>
         <div class="example-bubble">
           <span class="example-gab">Spa Get Tee Car Bone Ara</span>
           <span class="example-arrow">↓</span>
           <span class="example-answer">Spaghetti Carbonara 🍝</span>
         </div>
-        <p class="step-body" style="margin-top:8px; font-size:.88rem; color: var(--ink-3)">
-          <em>Yes, someone will yell "Spa Get Tee" for 45 seconds straight. That's part of the fun.</em>
-        </p>
       </div>
 
       <!-- Step 2 -->
@@ -129,38 +139,37 @@
         <p class="step-label">Step Three</p>
         <h2 class="step-heading">Beat the clock. Score the point.</h2>
         <p class="step-body">
-          Each card runs a countdown. Reveal the answer, then tap your team's <em>+1 Point</em> button to score. Most points when the deck runs out wins!<br><br>
-          Stuck? Use <em>Hints</em>, have the browser <em>Read It Aloud</em>, or go full sci-fi and tap <em>Listen</em> — shout the answer and the mic auto-detects it.
+          Each card runs a countdown. Reveal the answer, then tap your team's <em>+1 Point</em> button. Need help? Use <em>Hints</em>, <em>Read Aloud</em>, or try <em>Mic Mode</em> — shout it and the browser detects it.
         </p>
         <div class="example-bubble">
           <span class="example-gab">Sue Purr Cal Lee Fragile Istick…</span>
           <span class="example-arrow">↓ good luck lol</span>
-          <span class="example-answer">Supercalifragilisticexpialidocious 🎩</span>
+          <span class="example-answer">Supercalifragilistic… 🎩</span>
         </div>
       </div>
 
-      <!-- Step 3 (final) -->
+      <!-- Step 3 — final -->
       <div class="intro-step" data-step="3">
         <div class="step-emoji">🎉</div>
         <p class="step-label">You're ready!</p>
-        <h2 class="step-heading">Now set up your teams and start the madness.</h2>
+        <h2 class="step-heading">Set up your teams and start the madness.</h2>
         <p class="step-body">
-          Pick 2–4 teams, name them whatever you want, choose how long each round lasts, and hit <em>Start the Show</em>.<br><br>
-          Fair warning: the lo-fi music shifts into party mode when the clock is ticking. It's very hard to stay calm.
+          Pick 2–4 teams, name them, choose your timer length, and hit <em>Start the Show</em>.<br><br>
+          Fair warning: the music shifts into party mode when the clock is ticking. Very hard to stay calm.
         </p>
       </div>
 
     </div>
 
-    <!-- Dots -->
+    <!-- Progress dots -->
     <div class="intro-dots" id="introDots" role="tablist" aria-label="Intro steps">
-      <button class="intro-dot active" data-goto="0" role="tab" aria-selected="true" aria-label="Step 1"></button>
-      <button class="intro-dot" data-goto="1" role="tab" aria-selected="false" aria-label="Step 2"></button>
-      <button class="intro-dot" data-goto="2" role="tab" aria-selected="false" aria-label="Step 3"></button>
-      <button class="intro-dot" data-goto="3" role="tab" aria-selected="false" aria-label="Ready"></button>
+      <button class="intro-dot active" data-goto="0" role="tab" aria-selected="true"  aria-label="Step 1"></button>
+      <button class="intro-dot"        data-goto="1" role="tab" aria-selected="false" aria-label="Step 2"></button>
+      <button class="intro-dot"        data-goto="2" role="tab" aria-selected="false" aria-label="Step 3"></button>
+      <button class="intro-dot"        data-goto="3" role="tab" aria-selected="false" aria-label="Ready"></button>
     </div>
 
-    <!-- Intro nav buttons -->
+    <!-- Nav buttons -->
     <div class="intro-btn-row">
       <button class="btn btn-ghost" id="btnIntroSkip">Skip intro</button>
       <button class="btn btn-primary" id="btnIntroNext">Next →</button>
@@ -186,8 +195,8 @@
         <p class="panel-sub">2 to 4 teams. Rename if you're feeling spicy.</p>
         <div class="seg" id="teamCountSeg" role="group" aria-label="Number of teams">
           <button class="seg-btn sel" data-n="2">2 Teams</button>
-          <button class="seg-btn" data-n="3">3 Teams</button>
-          <button class="seg-btn" data-n="4">4 Teams</button>
+          <button class="seg-btn"     data-n="3">3 Teams</button>
+          <button class="seg-btn"     data-n="4">4 Teams</button>
         </div>
         <div class="teams-list" id="teamsList"></div>
       </div>
@@ -197,20 +206,20 @@
         <p class="panel-hd">⏱️ Timer Per Card</p>
         <p class="panel-sub">How long each card stays on the clock.</p>
         <div class="seg" id="timerSeg" role="group" aria-label="Card timer">
-          <button class="seg-btn" data-s="30">30s</button>
-          <button class="seg-btn" data-s="45">45s</button>
+          <button class="seg-btn"     data-s="30">30s</button>
+          <button class="seg-btn"     data-s="45">45s</button>
           <button class="seg-btn sel" data-s="60">60s</button>
-          <button class="seg-btn" data-s="90">90s</button>
-          <button class="seg-btn" data-s="120">2 min</button>
+          <button class="seg-btn"     data-s="90">90s</button>
+          <button class="seg-btn"     data-s="120">2 min</button>
         </div>
 
         <p class="panel-hd" style="margin-top:6px">🃏 Deck Size</p>
         <p class="panel-sub">How many cards to play.</p>
         <div class="seg" id="deckSeg" role="group" aria-label="Deck size">
-          <button class="seg-btn" data-l="10">10</button>
+          <button class="seg-btn"     data-l="10">10</button>
           <button class="seg-btn sel" data-l="20">20</button>
-          <button class="seg-btn" data-l="35">35</button>
-          <button class="seg-btn" data-l="all">All</button>
+          <button class="seg-btn"     data-l="35">35</button>
+          <button class="seg-btn"     data-l="all">All</button>
         </div>
 
         <label class="panel-hd deck-category-label" for="categorySelect">🗂️ Card category</label>
@@ -222,6 +231,7 @@
 
     </div>
 
+    <!-- History panel -->
     <section class="glass history-panel" aria-labelledby="historyHeading">
       <div class="history-heading-row">
         <div>
@@ -248,7 +258,7 @@
        ═══════════════════════════════════════════ -->
   <section class="screen" id="gameScreen" aria-label="Game stage">
 
-    <!-- Progress bar row -->
+    <!-- Progress bar -->
     <div class="stage-header">
       <div class="progress-info">
         <span id="progressLbl">Card 1 of 20</span>
@@ -282,7 +292,7 @@
           <p class="answer-text" id="answerText">—</p>
         </div>
       </div>
-      <div class="times-up" id="timesUp">TIME'S UP!</div>
+      <div class="times-up" id="timesUp" aria-live="assertive">TIME'S UP!</div>
     </div>
 
     <!-- Action buttons -->
@@ -315,12 +325,12 @@
 
     <div class="trophy-wrap">
       <svg width="90" height="90" viewBox="0 0 100 100" fill="none" aria-hidden="true">
-        <path d="M28 14h44v14c0 14-9 24-22 24s-22-10-22-24V14z" fill="#ffb703" stroke="#e8930c" stroke-width="3"/>
-        <path d="M28 20H14c0 14 7 20 14 21M72 20h14c0 14-7 20-14 21" stroke="#e8930c" stroke-width="4" stroke-linecap="round"/>
-        <rect x="44" y="52" width="12" height="16" fill="#e8930c"/>
-        <rect x="30" y="68" width="40" height="10" rx="3" fill="#ffb703" stroke="#e8930c" stroke-width="2"/>
-        <rect x="22" y="78" width="56" height="12" rx="4" fill="#d97706"/>
-        <polygon points="50,22 53,29 61,30 55,36 57,44 50,40 43,44 45,36 39,30 47,29" fill="#fff"/>
+        <path d="M28 14h44v14c0 14-9 24-22 24s-22-10-22-24V14z" fill="#FFB800" stroke="#D4620A" stroke-width="3"/>
+        <path d="M28 20H14c0 14 7 20 14 21M72 20h14c0 14-7 20-14 21" stroke="#D4620A" stroke-width="4" stroke-linecap="round"/>
+        <rect x="44" y="52" width="12" height="16" fill="#D4620A"/>
+        <rect x="30" y="68" width="40" height="10" rx="3" fill="#FFB800" stroke="#D4620A" stroke-width="2"/>
+        <rect x="22" y="78" width="56" height="12" rx="4" fill="#F47B20"/>
+        <polygon points="50,22 53,29 61,30 55,36 57,44 50,40 43,44 45,36 39,30 47,29" fill="#FFF4E6"/>
       </svg>
     </div>
 
@@ -339,37 +349,37 @@
 </div><!-- /app-wrap -->
 
 <!-- ── HOW TO PLAY DIALOG ───────────────────── -->
-<dialog class="rules-dialog" id="rulesDialog">
+<dialog class="rules-dialog" id="rulesDialog" aria-labelledby="rulesTitle">
   <div class="dialog-hd">
-    <h3 class="dialog-title">How to Play GabMad</h3>
-    <button class="pill-btn" id="btnCloseRules" aria-label="Close">
+    <h3 class="dialog-title" id="rulesTitle">How to Play GabMad</h3>
+    <button class="pill-btn" id="btnCloseRules" aria-label="Close dialog">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
   <div class="rule-steps">
     <div class="rule-row">
-      <div class="rule-num">1</div>
+      <div class="rule-num" aria-hidden="true">1</div>
       <div class="rule-content">
         <h4>Read The Nonsense</h4>
         <p>Say the gibberish phrase out loud, fast, over and over. Your brain will decode it.</p>
       </div>
     </div>
     <div class="rule-row">
-      <div class="rule-num">2</div>
+      <div class="rule-num" aria-hidden="true">2</div>
       <div class="rule-content">
         <h4>Shout The Answer First</h4>
         <p>When you hear the real phrase in your head — scream it before your opponents!</p>
       </div>
     </div>
     <div class="rule-row">
-      <div class="rule-num">3</div>
+      <div class="rule-num" aria-hidden="true">3</div>
       <div class="rule-content">
-        <h4>Score & Move On</h4>
+        <h4>Score &amp; Move On</h4>
         <p>Reveal the answer, award the point to the winning team, then draw the next card.</p>
       </div>
     </div>
     <div class="rule-row">
-      <div class="rule-num">4</div>
+      <div class="rule-num" aria-hidden="true">4</div>
       <div class="rule-content">
         <h4>AI Mic Mode</h4>
         <p>Tap <strong>Listen</strong> and yell the answer — the browser hears it and flips the card automatically!</p>
@@ -384,6 +394,33 @@
 <script src="js/audio.js"></script>
 <script src="js/speech.js"></script>
 <script src="js/game.js"></script>
+
+<!-- Splash screen controller (inline, runs before game.js init matters) -->
+<script>
+(function () {
+  const splash  = document.getElementById('splashScreen');
+  const video   = document.getElementById('splashVideo');
+  if (!splash || !video) return;
+
+  function dismiss() {
+    splash.classList.add('done');
+    // Remove from DOM after fade so it can't block anything
+    splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+  }
+
+  // Dismiss when video ends
+  video.addEventListener('ended', dismiss);
+
+  // Dismiss on click/tap anywhere on splash
+  splash.addEventListener('click', dismiss);
+
+  // Safety fallback: dismiss after 6 s even if video stalls
+  setTimeout(dismiss, 6000);
+
+  // If video can't play (no codec, blocked etc.) dismiss immediately
+  video.addEventListener('error', dismiss);
+})();
+</script>
 
 </body>
 </html>
