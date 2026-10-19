@@ -25,7 +25,7 @@
 <div id="splashScreen" role="presentation" aria-hidden="true">
   <video
     id="splashVideo"
-    src="logo.MP4"
+    src="gab-new.mov"
     autoplay
     muted
     playsinline
@@ -177,81 +177,113 @@
 
   </section>
 
-  <!-- ═══════════════════════════════════════════
-       SETUP SCREEN
-       ═══════════════════════════════════════════ -->
+  <!-- ==========================================================================
+   SETUP SCREEN — Multi-step flow (one step at a time)
+   ========================================================================== -->
   <section class="screen" id="setupScreen" aria-label="Game setup">
 
     <div class="setup-hero">
       <h2 class="setup-title">Set Up The Show</h2>
-      <p class="setup-sub">Name your teams, pick your timer, and start the chaos.</p>
+      <p class="setup-sub" id="setupSub">Build your game one step at a time.</p>
     </div>
 
-    <div class="setup-grid">
+    <!-- Step progress indicator -->
+    <div class="setup-progress" role="tablist" aria-label="Setup steps">
+      <button class="setup-step active" data-step="1" role="tab" aria-selected="true">
+        <span class="setup-step-num">1</span>
+        <span class="setup-step-label">Teams</span>
+      </button>
+      <button class="setup-step" data-step="2" role="tab" aria-selected="false">
+        <span class="setup-step-num">2</span>
+        <span class="setup-step-label">Game options</span>
+      </button>
+      <button class="setup-step setup-step-final" data-step="3" role="tab" aria-selected="false">
+        <span class="setup-step-num">3</span>
+        <span class="setup-step-label">Review & start</span>
+      </button>
+    </div>
 
-      <!-- Teams panel -->
-      <div class="glass panel">
-        <p class="panel-hd">👥 Teams</p>
-        <p class="panel-sub">2 to 4 teams. Rename if you're feeling spicy.</p>
-        <div class="seg" id="teamCountSeg" role="group" aria-label="Number of teams">
-          <button class="seg-btn sel" data-n="2">2 Teams</button>
-          <button class="seg-btn"     data-n="3">3 Teams</button>
-          <button class="seg-btn"     data-n="4">4 Teams</button>
+    <!-- Step container: only one .setup-step-panel.active at a time -->
+    <div class="setup-panels">
+
+      <!-- Step 1: Teams -->
+      <div class="setup-step-panel active" data-step="1">
+        <div class="glass panel">
+          <p class="panel-hd">👥 Teams</p>
+          <p class="panel-sub">2 to 4 teams. Rename if you're feeling spicy.</p>
+          <div class="seg" id="teamCountSeg" role="group" aria-label="Number of teams">
+            <button class="seg-btn sel" data-n="2">2 Teams</button>
+            <button class="seg-btn"     data-n="3">3 Teams</button>
+            <button class="seg-btn"     data-n="4">4 Teams</button>
+          </div>
+          <div class="teams-list" id="teamsList"></div>
         </div>
-        <div class="teams-list" id="teamsList"></div>
       </div>
 
-      <!-- Options panel -->
-      <div class="glass panel">
-        <p class="panel-hd">⏱️ Timer Per Card</p>
-        <p class="panel-sub">How long each card stays on the clock.</p>
-        <div class="seg" id="timerSeg" role="group" aria-label="Card timer">
-          <button class="seg-btn"     data-s="30">30s</button>
-          <button class="seg-btn"     data-s="45">45s</button>
-          <button class="seg-btn sel" data-s="60">60s</button>
-          <button class="seg-btn"     data-s="90">90s</button>
-          <button class="seg-btn"     data-s="120">2 min</button>
-        </div>
+      <!-- Step 2: Game options -->
+      <div class="setup-step-panel" data-step="2">
+        <div class="glass panel">
+          <p class="panel-hd">⏱️ Timer Per Card</p>
+          <p class="panel-sub">How long each card stays on the clock.</p>
+          <div class="seg" id="timerSeg" role="group" aria-label="Card timer">
+            <button class="seg-btn"     data-s="30">30s</button>
+            <button class="seg-btn"     data-s="45">45s</button>
+            <button class="seg-btn sel" data-s="60">60s</button>
+            <button class="seg-btn"     data-s="90">90s</button>
+            <button class="seg-btn"     data-s="120">2 min</button>
+          </div>
 
-        <p class="panel-hd" style="margin-top:6px">🃏 Deck Size</p>
-        <p class="panel-sub">How many cards to play.</p>
-        <div class="seg" id="deckSeg" role="group" aria-label="Deck size">
-          <button class="seg-btn"     data-l="10">10</button>
-          <button class="seg-btn sel" data-l="20">20</button>
-          <button class="seg-btn"     data-l="35">35</button>
-          <button class="seg-btn"     data-l="all">All</button>
-        </div>
+          <p class="panel-hd" style="margin-top:14px">🃏 Deck Size</p>
+          <p class="panel-sub">How many cards to play.</p>
+          <div class="seg" id="deckSeg" role="group" aria-label="Deck size">
+            <button class="seg-btn"     data-l="10">10</button>
+            <button class="seg-btn sel" data-l="20">20</button>
+            <button class="seg-btn"     data-l="35">35</button>
+            <button class="seg-btn"     data-l="all">All</button>
+          </div>
 
-        <label class="panel-hd deck-category-label" for="categorySelect">🗂️ Card category</label>
-        <p class="panel-sub">Choose a category or shuffle cards from every category.</p>
-        <select class="category-select" id="categorySelect" aria-label="Card category">
-          <option value="All">Shuffle all cards</option>
-        </select>
+          <label class="panel-hd deck-category-label" for="categorySelect">🗂️ Card category</label>
+          <p class="panel-sub">Choose a category or shuffle cards from every category.</p>
+          <select class="category-select" id="categorySelect" aria-label="Card category">
+            <option value="All">Shuffle all cards</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Step 3: Review & start -->
+      <div class="setup-step-panel" data-step="3">
+        <div class="glass panel">
+          <p class="panel-hd">📋 Review</p>
+          <p class="panel-sub">Double-check your teams and settings before starting.</p>
+          <div class="setup-review" id="setupReview"></div>
+        </div>
+        <div class="glass history-panel" aria-labelledby="historyHeading">
+          <div class="history-heading-row">
+            <div>
+              <h3 class="panel-hd" id="historyHeading">🏆 Team history</h3>
+              <p class="panel-sub">Wins and recent games are saved on this device.</p>
+            </div>
+          </div>
+          <p class="history-status" id="historyStatus" aria-live="polite"></p>
+          <div class="team-records" id="teamRecords"></div>
+          <ol class="recent-games" id="recentGames"></ol>
+        </div>
       </div>
 
     </div>
 
-    <!-- History panel -->
-    <section class="glass history-panel" aria-labelledby="historyHeading">
-      <div class="history-heading-row">
-        <div>
-          <h3 class="panel-hd" id="historyHeading">🏆 Team history</h3>
-          <p class="panel-sub">Wins and recent completed games are saved on this device.</p>
-        </div>
-      </div>
-      <p class="history-status" id="historyStatus" aria-live="polite"></p>
-      <div class="team-records" id="teamRecords"></div>
-      <ol class="recent-games" id="recentGames"></ol>
-    </section>
-
-    <div class="setup-start">
-      <button class="btn btn-mega" id="btnStart">🚀 Start the Show</button>
-      <p class="kbd-hint">
-        <kbd>Space</kbd> Flip &bull; <kbd>H</kbd> Hint &bull; <kbd>S</kbd> Read aloud &bull; <kbd>M</kbd> Mic &bull; <kbd>P</kbd> Pause &bull; <kbd>1–4</kbd> Score
-      </p>
+    <!-- Step navigation -->
+    <div class="setup-nav">
+      <button class="btn btn-ghost" id="setupBtnBack" style="display:none">← Back</button>
+      <button class="btn btn-primary" id="setupBtnNext">Next →</button>
+      <button class="btn btn-mega setup-start-btn" id="btnStart" style="display:none">🚀 Start the Show</button>
     </div>
+    <p class="kbd-hint">
+      <kbd>Space</kbd> Flip &bull; <kbd>H</kbd> Hint &bull; <kbd>S</kbd> Read aloud &bull; <kbd>M</kbd> Mic &bull; <kbd>P</kbd> Pause &bull; <kbd>1–4</kbd> Score
+    </p>
 
   </section>
+
 
   <!-- ═══════════════════════════════════════════
        GAME SCREEN
@@ -411,9 +443,13 @@
     // Phase 1: trigger the CSS morph-to-nav animation
     splash.classList.add('morphing');
 
-    // Phase 2: after animation completes, hide entirely
+    // Phase 2: after morph completes, hide splash and reveal the intro screen
     setTimeout(function () {
       splash.classList.add('done');
+      // Flow the intro animation in right after the splash morphs away
+      if (typeof showScreen === 'function') {
+        showScreen('intro');
+      }
     }, 580); // matches splashMorph duration + tiny buffer
   }
 

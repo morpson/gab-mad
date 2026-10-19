@@ -729,6 +729,109 @@ body {
   gap: 16px;
 }
 
+/* ── Multi-step setup progress ── */
+.setup-progress {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+.setup-progress::-webkit-scrollbar { display: none; }
+
+.setup-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+  padding: 10px 14px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-pill);
+  background: rgba(255, 160, 50, 0.04);
+  color: var(--ink-3);
+  font-family: var(--font-body);
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .25s var(--ease-out);
+  flex-shrink: 0;
+}
+.setup-step:hover { border-color: var(--surface-border); color: var(--ink-2); }
+.setup-step.active {
+  background: linear-gradient(135deg, var(--orange), var(--gold));
+  color: #2D1A06;
+  border-color: transparent;
+  box-shadow: 0 2px 12px var(--orange-glow);
+}
+.setup-step-final { min-width: 170px; }
+.setup-step-num {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+/* ── Step panels ── */
+.setup-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 340px;
+}
+.setup-step-panel {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  animation: setupFadeIn .4s var(--ease-out);
+}
+.setup-step-panel.active { display: flex; }
+
+@keyframes setupFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Step navigation ── */
+.setup-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+.setup-nav .btn-ghost {
+  padding: 10px 20px;
+  font-size: .9rem;
+}
+.setup-start-btn {
+  display: none !important;
+}
+.setup-start-btn.active { display: inline-flex !important; }
+
+/* ── Review panel ── */
+.setup-review {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+.review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255, 160, 50, 0.06);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-md);
+}
+.review-row .review-label { color: var(--ink-2); font-size: .9rem; }
+.review-row .review-value { color: var(--ink); font-weight: 800; font-family: var(--font-display); }
+
+/* Hide the old one-shot start section when multi-step is active */
+.setup-start { display: none; }
+.setup-start.active { display: flex; }
+
+
 .panel {
   padding: 22px 20px;
   display: flex;
@@ -1538,6 +1641,12 @@ button:focus-visible {
   .action-bar .btn { padding: 9px 12px; font-size: .82rem; }
   .setup-grid { grid-template-columns: 1fr; }
   .setup-hero { padding: 0; }
+  .setup-progress { flex-wrap: nowrap; gap: 6px; margin-bottom: 12px; }
+  .setup-step { min-width: 120px; padding: 8px 10px; font-size: .75rem; }
+  .setup-step-num { font-size: .9rem; }
+  .setup-panels { min-height: 280px; }
+  .setup-nav { flex-direction: column; gap: 8px; align-items: stretch; }
+  .setup-nav .btn { width: 100%; }
   .panel { padding: 16px 14px; gap: 10px; }
   .team-row { padding: 8px 11px; gap: 8px; }
   .team-avatar-select { max-width: 86px; padding: 6px 5px; }
@@ -1558,3 +1667,113 @@ button:focus-visible {
   .card-flipper { transition-duration: .001s; }
   #splashScreen { display: none !important; }
 }
+
+
+/* ==========================================================================
+   TV / LARGE SCREEN — 10ft experience
+   ========================================================================== */
+@media (min-width: 1400px) and (pointer: coarse), (min-width: 1920px) {
+  :root {
+    --font-body-scale: 1.25;
+  }
+
+  body { font-size: 1.15rem; }
+
+  .top-nav { gap: 20px; padding: 16px 32px; }
+  .brand-logo-img { height: 44px; }
+  .pill-btn { width: 52px; height: 52px; font-size: 1.1rem; }
+  .pill-btn svg { width: 24px; height: 24px; }
+
+  .setup-title { font-size: clamp(3rem, 6vw, 4.5rem); }
+  .setup-sub { font-size: 1.25rem; max-width: 700px; }
+
+  .setup-progress { gap: 16px; margin-bottom: 24px; }
+  .setup-step {
+    min-width: 200px;
+    padding: 14px 20px;
+    font-size: 1rem;
+  }
+  .setup-step-num { font-size: 1.25rem; }
+
+  .setup-panels { min-height: 520px; }
+
+  .panel { padding: 32px 28px; gap: 20px; }
+  .panel-hd { font-size: 1.25rem; gap: 12px; }
+  .panel-sub { font-size: 1rem; }
+
+  .seg { padding: 6px; gap: 6px; }
+  .seg-btn {
+    padding: 14px 12px;
+    font-size: 1rem;
+  }
+
+  .category-select,
+  .team-avatar-select {
+    padding: 16px 18px;
+    font-size: 1.05rem;
+  }
+
+  .team-row {
+    padding: 14px 20px;
+    gap: 18px;
+  }
+  .team-inp { font-size: 1.1rem; }
+  .team-swatch { width: 20px; height: 20px; }
+
+  .btn { padding: 16px 32px; font-size: 1.05rem; }
+  .btn-mega { padding: 22px 48px; font-size: 1.4rem; }
+  .btn-ghost { padding: 14px 28px; font-size: 1rem; }
+
+  .kbd-hint { font-size: 1rem; }
+  .kbd-hint kbd { padding: 3px 10px; font-size: .9rem; }
+
+  /* Game screen TV sizes */
+  .gab-text { font-size: clamp(2.5rem, 6vw, 4rem); }
+  .answer-text { font-size: clamp(1.5rem, 3vw, 2rem); }
+  .timer-num { font-size: clamp(2rem, 4vw, 3rem); }
+
+  .winner-headline { font-size: clamp(2.5rem, 5vw, 3.5rem); }
+  .winner-sub { font-size: 1.25rem; }
+
+  .rules-dialog {
+    padding: 40px 36px;
+    max-width: 700px;
+  }
+  .rules-dialog .dialog-title { font-size: 1.75rem; }
+  .rule-row { padding: 20px 24px; gap: 18px; }
+  .rule-num { width: 44px; height: 44px; font-size: 1.25rem; }
+  .rule-content h4 { font-size: 1.15rem; }
+  .rule-content p { font-size: 1rem; }
+}
+
+/* ==========================================================================
+   VISUAL CLEANUP — less crowded, more breathing room
+   ========================================================================== */
+
+/* App wrap: more generous padding */
+.app-wrap { padding: 24px 32px 60px; max-width: 1100px; margin: 0 auto; }
+
+/* Top nav: cleaner spacing */
+.top-nav { gap: 14px; padding: 12px 24px; }
+
+/* Cards: softer, less sharp corners */
+.card-flipper { border-radius: var(--r-xl); }
+
+/* Action bar: tighter gap */
+.action-bar { gap: 10px; }
+
+/* Blobs: slower, calmer motion */
+.blob {
+  animation-duration: 12s;
+}
+
+/* Intro: softer steps */
+.intro-step { padding: 24px; }
+.intro-body { font-size: 1rem; line-height: 1.7; color: var(--ink-2); }
+
+/* Focus states for TV remote navigation */
+button:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 4px;
+}
+

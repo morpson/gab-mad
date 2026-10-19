@@ -57,6 +57,7 @@ const state = {
   teamCount:   2,
   timerSecs:   60,
   cardLimit:   20,
+  setupStep:   1,    // 1 = teams, 2 = options, 3 = review
   category:    "All",
   teams:       [],
   teamDrafts:  [],
@@ -135,6 +136,10 @@ function bindIntro() {
 /* ── SCREEN TRANSITIONS ─────────────────────── */
 function showScreen(name) {
   state.screen = name;
+  // Reset setup flow to step 1 whenever entering setup
+  if (name === "setup") {
+    state.setupStep = 1;
+  }
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active", "screen-enter"));
   const target = $(`${name}Screen`);
   if (target) {
@@ -327,6 +332,78 @@ function recordCompletedGame() {
   renderTeamHistory();
 }
 
+/* ── MULTI-STEP SETUP ───────────────────────── */
+
+function gotoSetupStep(n) {
+  state.setupStep = Math.max(1, Math.min(3, n));
+
+  // Update step tabs
+  document.querySelectorAll(".setup-step").forEach((tab, i) => {
+    const active = i + 1 === state.setupStep;
+    tab.classList.toggle("active", active);
+    tab.setAttribute("aria-selected", active);
+  });
+
+  // Update step panels
+  document.querySelectorAll(".setup-step-panel").forEach((panel, i) => {
+    panel.classList.toggle("active", i + 1 === state.setupStep);
+  });
+
+  // Update nav buttons
+  const backBtn = $("setupBtnBack");
+  const nextBtn = $("setupBtnNext");
+  const startBtn = $("btnStart");
+
+  if (backBtn) backBtn.style.display = state.setupStep === 1 ? "none" : "inline-flex";
+  if (nextBtn) nextBtn.style.display = state.setupStep === 3 ? "none" : "inline-flex";
+  if (startBtn) {
+    startBtn.style.display = state.setupStep === 3 ? "inline-flex" : "none";
+    startBtn.classList.toggle("active", state.setupStep === 3);
+  }
+
+  // Build review content on step 3
+  if (state.setupStep === 3) {
+    buildSetupReview();
+  }
+
+  if (window.gabAudio) window.gabAudio.click();
+}
+
+function buildSetupReview() {
+  const review = $("setupReview");
+  if (!review) return;
+
+  const teamCount = state.teamCount;
+  const timerSecs = state.timerSecs;
+  const cardLimit = state.cardLimit === 9999 ? "All" : state.cardLimit;
+  const category = state.category;
+
+  const teamNames = [];
+  for (let i = 0; i < teamCount; i++) {
+    const inp = $(`tinp${i}`);
+    teamNames.push((inp && inp.value.trim()) || TEAM_DEFAULTS[i].name);
+  }
+
+  review.innerHTML = `
+    <div class="review-row">
+      <span class="review-label">Teams</span>
+      <span class="review-value">${teamNames.join(" · ")}</span>
+    </div>
+    <div class="review-row">
+      <span class="review-label">Timer per card</span>
+      <span class="review-value">${timerSecs}s</span>
+    </div>
+    <div class="review-row">
+      <span class="review-label">Deck size</span>
+      <span class="review-value">${cardLimit}</span>
+    </div>
+    <div class="review-row">
+      <span class="review-label">Category</span>
+      <span class="review-value">${category}</span>
+    </div>
+  `;
+}
+
 function bindSetup() {
   // team count
   $("teamCountSeg").addEventListener("click", e => {
@@ -365,6 +442,21 @@ function bindSetup() {
     if (window.gabAudio) { window.gabAudio.getContext(); window.gabAudio.fanfare(); }
     startGame();
   });
+
+  // Step tab clicks
+  document.querySelectorAll(".setup-step").forEach(tab => {
+    tab.addEventListener("click", () => {
+      const step = parseInt(tab.dataset.step, 10);
+      gotoSetupStep(step);
+    });
+  });
+
+  // Back / Next nav
+  $("setupBtnBack").addEventListener("click", () => gotoSetupStep(state.setupStep - 1));
+  $("setupBtnNext").addEventListener("click", () => gotoSetupStep(state.setupStep + 1));
+
+  // Initialize on first show
+  gotoSetupStep(1);
 }
 
 /* ── GAME START ─────────────────────────────── */
@@ -963,5 +1055,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTeamInputs();
   populateCategoryOptions();
   renderTeamHistory();
-  showScreen("intro");
+  // Intro is revealed by the splash controller after it dismisses,
+  // so the intro animation flows naturally after the splash video.
 });
