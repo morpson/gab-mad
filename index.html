@@ -25,12 +25,18 @@
 <div id="splashScreen" role="presentation" aria-hidden="true">
   <video
     id="splashVideo"
-    src="gab-new.mov"
     autoplay
     muted
     playsinline
     preload="auto"
-  ></video>
+  >
+    <!-- Safari / iOS: HEVC with Alpha -->
+    <source src="gab-new.mov" type='video/mp4; codecs="hvc1"'>
+    <source src="gab-new.mov" type="video/quicktime">
+
+    <!-- Chrome / Firefox / Edge: Compressed WebM VP9 Alpha -->
+    <source src="gab-new.webm" type='video/webm; codecs="vp9"'>
+  </video>
   <p class="splash-tap">tap to skip</p>
 </div>
 
@@ -456,11 +462,19 @@
   video.addEventListener('ended', dismiss);
   splash.addEventListener('click', dismiss);
 
-  // Safety: dismiss after 6s regardless
-  setTimeout(dismiss, 6000);
+  // Safety: fallback if video finishes or stalls (video duration is ~7.67s)
+  setTimeout(dismiss, 8500);
 
   // If video fails to load/play, dismiss immediately
   video.addEventListener('error', dismiss);
+
+  // Kick off autoplay safely across all browsers
+  const playPromise = video.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(function () {
+      // Autoplay blocked by policy; tap-to-skip is active
+    });
+  }
 })();
 </script>
 
