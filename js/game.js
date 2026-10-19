@@ -69,6 +69,9 @@ const state = {
   paused:      false,
   timeUp:      false,
   hintTier:    0,
+  activeTeamIdx: 0,
+  roomId:      null,
+  isJudgeMode: false,
   historyTeams: savedHistory.teams,
   historyGames: savedHistory.games,
   historyError: savedHistory.error,
@@ -153,6 +156,9 @@ function showScreen(name) {
 
   const quitBtn = $("btnQuitGame");
   if (quitBtn) quitBtn.style.display = name === "game" ? "inline-flex" : "none";
+
+  const topNav = $("topNav");
+  if (topNav) topNav.style.display = name === "judge" ? "none" : "flex";
 
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -475,6 +481,7 @@ function startGame() {
   }
   state.deck = getShuffledDeck(state.category, state.cardLimit);
   state.idx = 0;
+  state.activeTeamIdx = 0;
 
   renderHUD();
   showScreen("game");
@@ -489,6 +496,7 @@ function dealCard() {
   state.timeUp  = false;
   state.paused  = false;
   state.hintTier = 0;
+  state.activeTeamIdx = state.idx % state.teams.length;
 
   // reset 3D card (no flash)
   const flipper = $("cardFlipper");
@@ -523,6 +531,8 @@ function dealCard() {
 
   $("btnPause").textContent = "⏸ Pause";
 
+  updateTurnDisplay();
+
   if (window.gabAudio) {
     window.gabAudio.deal();
     window.gabAudio.setMusicMode("fast");
@@ -530,6 +540,7 @@ function dealCard() {
   }
 
   state.remainingMs = state.timerSecs * 1000;
+  broadcastGameState();
   startTimer();
 }
 
@@ -550,6 +561,7 @@ function startTimer() {
       const cur = Math.ceil(state.remainingMs / 1000);
       if (cur !== lastSec) {
         lastSec = cur;
+        broadcastGameState();
         if (cur > 0 && cur <= 5 && window.gabAudio)  window.gabAudio.urgentTick();
         else if (cur > 0 && cur <= 10 && window.gabAudio) window.gabAudio.tick();
       }
@@ -591,6 +603,7 @@ function onTimeUp() {
 
   if (window.gabAudio) window.gabAudio.buzzer();
   if (window.gabSpeech) window.gabSpeech.stop();
+  broadcastGameState();
 }
 
 /* ── GAME ACTIONS ───────────────────────────── */
@@ -616,7 +629,9 @@ function reveal() {
   $("progressFill").style.width = `${((state.idx + 1) / state.deck.length) * 100}%`;
   buildScoreGrid();
   $("scoringPanel").classList.add("show");
+  broadcastGameState();
 }
+
 
 function showHint() {
   if (state.phase !== "gab") return;
@@ -1042,9 +1057,302 @@ function bindKeys() {
   });
 }
 
+/* ── TURN & SYNC CONTROLLER ─────────────────── */
+function updateTurnDisplay() {
+  const activeTeam = state.teams[state.activeTeamIdx];
+  const disp = $("activeTeamDisplay");
+  if (disp && activeTeam) {
+    disp.textContent = `${activeTeam.avatar ? activeTeam.avatar + " " : ""}${activeTeam.name}`;
+    disp.style.color = activeTeam.color;
+  }
+  const peek = $("peekVal");
+  if (peek && state.deck[state.idx]) {
+    peek.textContent = state.deck[state.idx].a;
+  }
+}
+
+function broadcastGameState() {
+  if (!window.GabSync || window.GabSync.role !== "host") return;
+  const card = state.deck[state.idx] || null;
+  const activeTeam = state.teams[state.activeTeamIdx] || null;
+  window.GabSync.broadcastState({
+    idx: state.idx,
+    totalCards: state.deck ? state.deck.length : 0,
+    card: card ? { g: titleCase(card.g), a: card.a, c: card.c, hint: card.hint } : null,
+    phase: state.phase,
+    activeTeamIdx: state.activeTeamIdx,
+    activeTeam: activeTeam,
+    teams: state.teams,
+    remainingMs: state.remainingMs,
+    timerSecs: state.timerSecs,
+    paused: state.paused,
+    timeUp: state.timeUp,
+    hintTier: state.hintTier
+  });
+}
+
+function initSyncHost() {
+  if (!window.GabSync) return;
+  state.roomId = window.GabSync.initHost();
+
+  window.GabSync.on("peers", data => {
+    const dot = $("judgeBadgeDot");
+    if (dot) dot.classList.toggle("connected", data.count > 0);
+    const peerDot = $("peerStatusDot");
+    const peerText = $("peerStatusText");
+    if (peerDot) peerDot.classList.toggle("connected", data.count > 0);
+    if (peerText) {
+      peerText.textContent = data.count > 0 
+        ? `🟢 ${data.count} opponent phone${data.count > 1 ? "s" : ""} connected!` 
+        : "Waiting for opponent phone to connect…";
+    }
+  });
+
+  window.GabSync.on("command", ({ command, payload }) => {
+    if (command === "CORRECT") {
+      awardPoint(state.activeTeamIdx);
+      if (typeof triggerConfetti === "function") triggerConfetti();
+      setTimeout(() => nextCard(), 1200);
+    } else if (command === "REVEAL") {
+      reveal();
+    } else if (command === "HINT") {
+      showHint();
+    } else if (command === "PAUSE_TOGGLE") {
+      togglePause();
+    } else if (command === "NEXT") {
+      nextCard();
+    }
+  });
+}
+
+let qrCodeInstance = null;
+
+function openJudgeDialog() {
+  const dialog = $("judgeDialog");
+  if (!dialog) return;
+
+  if (!state.roomId) {
+    state.roomId = window.GabSync ? window.GabSync.initHost() : "GAB1";
+  }
+
+  const roomDisplay = $("roomCodeDisplay");
+  if (roomDisplay) roomDisplay.textContent = state.roomId;
+
+  const judgeUrl = window.GabSync ? window.GabSync.getJudgeUrl() : window.location.href;
+  const linkTab = $("linkOpenJudgeTab");
+  if (linkTab) linkTab.href = judgeUrl;
+
+  const qrBox = $("judgeQrBox");
+  if (qrBox && typeof QRCode !== "undefined") {
+    qrBox.innerHTML = "";
+    qrCodeInstance = new QRCode(qrBox, {
+      text: judgeUrl,
+      width: 180,
+      height: 180,
+      colorDark: "#0B0D13",
+      colorLight: "#FFFFFF",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+
+  dialog.showModal();
+}
+
+function bindJudgeDialog() {
+  const btnOpen = $("btnJudgeModal");
+  if (btnOpen) btnOpen.addEventListener("click", openJudgeDialog);
+
+  const btnGameOpen = $("btnOpenJudgeModalFromGame");
+  if (btnGameOpen) btnGameOpen.addEventListener("click", openJudgeDialog);
+
+  const btnClose = $("btnCloseJudgeDialog");
+  if (btnClose) btnClose.addEventListener("click", () => $("judgeDialog").close());
+
+  const btnCopy = $("btnCopyJudgeLink");
+  if (btnCopy) {
+    btnCopy.addEventListener("click", async () => {
+      const url = window.GabSync ? window.GabSync.getJudgeUrl() : window.location.href;
+      try {
+        await navigator.clipboard.writeText(url);
+        btnCopy.textContent = "Copied! ✓";
+        setTimeout(() => { btnCopy.textContent = "📋 Copy Judge Link"; }, 2000);
+      } catch (err) {
+        prompt("Copy this Judge Screen link:", url);
+      }
+    });
+  }
+}
+
+function bindPeekControl() {
+  const btn = $("btnPeekAnswer");
+  const pop = $("peekPopover");
+  if (!btn || !pop) return;
+
+  function showPeek(e) {
+    if (e && e.cancelable) e.preventDefault();
+    pop.classList.add("show");
+  }
+
+  function hidePeek() {
+    pop.classList.remove("show");
+  }
+
+  btn.addEventListener("mousedown", showPeek);
+  btn.addEventListener("touchstart", showPeek, { passive: false });
+
+  btn.addEventListener("mouseup", hidePeek);
+  btn.addEventListener("mouseleave", hidePeek);
+  btn.addEventListener("touchend", hidePeek);
+  btn.addEventListener("touchcancel", hidePeek);
+}
+
+/* ── JUDGE SCREEN CONTROLLER ────────────────── */
+function renderJudgeState(remote) {
+  if (!remote) return;
+
+  // Timer
+  const timerNum = $("judgeTimerNum");
+  if (timerNum && typeof remote.remainingMs === "number") {
+    const sec = Math.ceil(remote.remainingMs / 1000);
+    timerNum.textContent = sec;
+    const chip = $("judgeTimerChip");
+    if (chip) chip.classList.toggle("low", sec <= 10 && sec > 0);
+  }
+
+  // Active Team info
+  if (remote.activeTeam) {
+    const swatch = $("judgeTeamSwatch");
+    const avatar = $("judgeTeamAvatar");
+    const name = $("judgeActiveTeamName");
+    if (swatch) swatch.style.background = remote.activeTeam.color;
+    if (avatar) avatar.textContent = remote.activeTeam.avatar || "";
+    if (name) {
+      name.textContent = remote.activeTeam.name;
+      name.style.color = remote.activeTeam.color;
+    }
+  }
+
+  // Card details
+  if (remote.card) {
+    const cat = $("judgeCardCat");
+    const ans = $("judgeAnswerText");
+    const gab = $("judgeGabText");
+    if (cat) cat.textContent = remote.card.c;
+    if (ans) ans.textContent = remote.card.a;
+    if (gab) gab.textContent = remote.card.g;
+  }
+
+  // Hint status
+  const hintStatus = $("judgeHintStatus");
+  if (hintStatus) {
+    if (remote.hintTier > 0 && remote.card) {
+      hintStatus.textContent = `💡 Clue active: ${remote.card.hint || remote.card.c}`;
+      hintStatus.style.display = "block";
+    } else {
+      hintStatus.style.display = "none";
+    }
+  }
+
+  // Scores grid
+  const scoreGrid = $("judgeScoresGrid");
+  if (scoreGrid && Array.isArray(remote.teams)) {
+    scoreGrid.innerHTML = "";
+    remote.teams.forEach(t => {
+      const chip = document.createElement("div");
+      chip.className = "judge-score-chip";
+      chip.innerHTML = `
+        <span class="chip-dot" style="background:${t.color}; box-shadow:0 0 8px ${t.color}88"></span>
+        <span class="chip-name">${t.avatar ? t.avatar + " " : ""}${t.name}</span>
+        <span class="chip-score">${t.score || 0}</span>
+      `;
+      scoreGrid.appendChild(chip);
+    });
+  }
+}
+
+function bindJudgeMode() {
+  const btnCorrect = $("judgeBtnCorrect");
+  if (btnCorrect) {
+    btnCorrect.addEventListener("click", () => {
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate([100, 50, 100]);
+      }
+      if (window.GabSync) {
+        window.GabSync.sendCommand("CORRECT");
+      }
+      btnCorrect.classList.add("tapped");
+      setTimeout(() => btnCorrect.classList.remove("tapped"), 600);
+    });
+  }
+
+  const btnHint = $("judgeBtnHint");
+  if (btnHint) {
+    btnHint.addEventListener("click", () => {
+      if (window.GabSync) window.GabSync.sendCommand("HINT");
+    });
+  }
+
+  const btnPause = $("judgeBtnPause");
+  if (btnPause) {
+    btnPause.addEventListener("click", () => {
+      if (window.GabSync) window.GabSync.sendCommand("PAUSE_TOGGLE");
+    });
+  }
+
+  const btnReveal = $("judgeBtnReveal");
+  if (btnReveal) {
+    btnReveal.addEventListener("click", () => {
+      if (window.GabSync) window.GabSync.sendCommand("REVEAL");
+    });
+  }
+
+  const btnPass = $("judgeBtnPass");
+  if (btnPass) {
+    btnPass.addEventListener("click", () => {
+      if (window.GabSync) window.GabSync.sendCommand("NEXT");
+    });
+  }
+
+  const btnDisconnect = $("judgeBtnDisconnect");
+  if (btnDisconnect) {
+    btnDisconnect.addEventListener("click", () => {
+      window.location.href = window.location.pathname;
+    });
+  }
+}
+
+function initJudgeMode(roomId) {
+  state.isJudgeMode = true;
+  state.screen = "judge";
+  showScreen("judge");
+
+  bindJudgeMode();
+
+  if (window.GabSync) {
+    window.GabSync.initJudge(roomId);
+    window.GabSync.on("state", renderJudgeState);
+    window.GabSync.on("connection", ({ connected }) => {
+      const liveTag = document.querySelector(".judge-live-tag");
+      if (liveTag) {
+        liveTag.textContent = connected ? `LIVE CONNECTED (${roomId})` : "RECONNECTING…";
+        liveTag.classList.toggle("connected", connected);
+      }
+    });
+  }
+}
+
 /* ── INIT ───────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
   applyTheme(state.theme);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("role") === "judge") {
+    const splash = $("splashScreen");
+    if (splash) splash.remove();
+    initJudgeMode(urlParams.get("room") || "");
+    return;
+  }
+
   bindIntro();
   bindSetup();
   bindGame();
@@ -1055,6 +1363,8 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTeamInputs();
   populateCategoryOptions();
   renderTeamHistory();
-  // Intro is revealed by the splash controller after it dismisses,
-  // so the intro animation flows naturally after the splash video.
+
+  initSyncHost();
+  bindJudgeDialog();
+  bindPeekControl();
 });

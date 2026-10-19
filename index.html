@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#140E06" />
+  <meta name="theme-color" content="#0B0D13" />
   <meta name="description" content="GabMad — sound out the nonsense phrases and shout the real phrase first!" />
   <title>GabMad — It's MadGab, but free</title>
 
@@ -12,32 +12,21 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     SPLASH SCREEN — logo video with mix-blend-mode lighten
-     Dismissed on video end OR on tap/click
+     SPLASH SCREEN — Animated static logo entrance → flows into hero
      ═══════════════════════════════════════════════════════════════ -->
 <div id="splashScreen" role="presentation" aria-hidden="true">
-  <video
-    id="splashVideo"
-    autoplay
-    muted
-    playsinline
-    preload="auto"
-  >
-    <!-- Safari / iOS: HEVC with Alpha -->
-    <source src="gab-new.mov" type='video/mp4; codecs="hvc1"'>
-    <source src="gab-new.mov" type="video/quicktime">
-
-    <!-- Chrome / Firefox / Edge: Compressed WebM VP9 Alpha -->
-    <source src="gab-new.webm" type='video/webm; codecs="vp9"'>
-  </video>
-  <p class="splash-tap">tap to skip</p>
+  <div class="splash-logo-stage">
+    <div class="splash-glow-ring"></div>
+    <img src="logo.PNG" alt="GabMad" class="splash-logo-img" id="splashLogoImg" />
+  </div>
+  <p class="splash-tap">tap anywhere to start</p>
 </div>
 
 <!-- Animated background blobs -->
@@ -55,11 +44,17 @@
 
   <!-- ── TOP NAV ────────────────────────────── -->
   <header class="top-nav" id="topNav">
-    <a href="#" class="brand" id="brandHome" aria-label="GabMad home">
-      <img src="logo.PNG" alt="GabMad" class="brand-logo-img" />
-    </a>
+    <div class="nav-spacer" aria-hidden="true"></div>
 
     <div class="nav-pills">
+      <button class="pill-btn glow-cyan" id="btnJudgeModal" title="Opponent / Judge Screen" aria-label="Opponent Judge Screen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+          <line x1="12" y1="18" x2="12.01" y2="18"/>
+        </svg>
+        <span class="judge-badge-dot" id="judgeBadgeDot" title="Opponent screen status"></span>
+      </button>
+
       <button class="pill-btn glow-gold" id="btnOpenRules" title="How to play" aria-label="How to play">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/>
@@ -296,6 +291,18 @@
        ═══════════════════════════════════════════ -->
   <section class="screen" id="gameScreen" aria-label="Game stage">
 
+    <!-- Active Turn & Opponent Indicator Banner -->
+    <div class="turn-banner" id="turnBanner">
+      <div class="turn-tag-wrap">
+        <span class="turn-pulse-dot" aria-hidden="true"></span>
+        <span class="turn-badge">ACTIVE TURN</span>
+        <span class="turn-team" id="activeTeamDisplay">The Orange Crush</span>
+      </div>
+      <div class="turn-sub-note" id="turnSubNote">
+        Opponent sees answer on <button class="turn-judge-link" id="btnOpenJudgeModalFromGame" type="button">Judge Screen 📱</button>
+      </div>
+    </div>
+
     <!-- Progress bar -->
     <div class="stage-header">
       <div class="progress-info">
@@ -333,6 +340,18 @@
       <div class="times-up" id="timesUp" aria-live="assertive">TIME'S UP!</div>
     </div>
 
+    <!-- Peek answer secretly on single phone -->
+    <div class="peek-control" id="peekControl">
+      <button class="btn btn-peek" id="btnPeekAnswer" type="button" aria-haspopup="true">
+        <span class="peek-icon">👁️</span>
+        <span class="peek-text">Hold to Peek Answer</span>
+      </button>
+      <div class="peek-popover" id="peekPopover" aria-hidden="true">
+        <span class="peek-label">Opponent / Judge Peek:</span>
+        <div class="peek-val" id="peekVal">—</div>
+      </div>
+    </div>
+
     <!-- Action buttons -->
     <div class="action-bar" id="actionBar">
       <button class="btn" id="btnHint">💡 Hint</button>
@@ -352,6 +371,78 @@
         <button class="btn" id="btnNobody">❌ Nobody got it</button>
         <button class="btn btn-primary" id="btnNext">Next Card ➡️</button>
       </div>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       OPPONENT / JUDGE SCREEN (Second Screen)
+       Private screen for the team that is NOT guessing
+       ═══════════════════════════════════════════ -->
+  <section class="screen" id="judgeScreen" aria-label="Opponent Judge View">
+
+    <div class="judge-screen-header">
+      <div class="judge-brand-wrap">
+        <span class="judge-live-tag">LIVE SECOND SCREEN</span>
+        <h2 class="judge-screen-title">Opponent Judge View</h2>
+      </div>
+      <div class="judge-timer-chip" id="judgeTimerChip">
+        <span class="judge-timer-icon">⏱️</span>
+        <span id="judgeTimerNum">60</span>s
+      </div>
+    </div>
+
+    <div class="judge-privacy-notice">
+      <span class="privacy-icon">🤫</span>
+      <span>Keep this screen hidden from the guessing team!</span>
+    </div>
+
+    <div class="judge-turn-card">
+      <div class="judge-turn-status">
+        <span class="judge-pulse-dot" aria-hidden="true"></span>
+        <span class="judge-turn-lead">CURRENTLY GUESSING:</span>
+      </div>
+      <div class="judge-team-badge" id="judgeActiveTeamBadge">
+        <span class="team-swatch" id="judgeTeamSwatch"></span>
+        <span class="team-avatar" id="judgeTeamAvatar"></span>
+        <span class="judge-team-name" id="judgeActiveTeamName">—</span>
+      </div>
+    </div>
+
+    <!-- Massive Answer Card for Judges -->
+    <div class="judge-card-display">
+      <div class="judge-card-cat" id="judgeCardCat">Classic</div>
+      <div class="judge-answer-heading">THE SECRET ANSWER IS:</div>
+      <div class="judge-big-answer" id="judgeAnswerText">—</div>
+      <div class="judge-gab-reference">
+        <span class="ref-label">Sounds like:</span>
+        <span class="ref-gab" id="judgeGabText">—</span>
+      </div>
+      <div class="judge-hint-status" id="judgeHintStatus"></div>
+    </div>
+
+    <!-- Judge Immediate Control Actions -->
+    <div class="judge-controls">
+      <button class="btn btn-judge-correct" id="judgeBtnCorrect">
+        <span class="action-emoji">✅</span>
+        <span class="action-text">THEY SHOUTED IT! (+1 Pt)</span>
+      </button>
+      <div class="judge-aux-row">
+        <button class="btn btn-sm" id="judgeBtnHint">💡 Give Clue</button>
+        <button class="btn btn-sm" id="judgeBtnPause">⏸ Pause</button>
+        <button class="btn btn-sm" id="judgeBtnReveal">✨ Reveal on Main</button>
+        <button class="btn btn-sm" id="judgeBtnPass">⏭ Pass</button>
+      </div>
+    </div>
+
+    <!-- Live Scoreboard -->
+    <div class="glass judge-scores-panel">
+      <div class="judge-scores-hd">🏆 Live Scores</div>
+      <div class="judge-scores-grid" id="judgeScoresGrid"></div>
+    </div>
+
+    <div class="judge-footer">
+      <button class="btn btn-ghost" id="judgeBtnDisconnect">← Exit Judge Mode</button>
     </div>
 
   </section>
@@ -385,6 +476,34 @@
   </section>
 
 </div><!-- /app-wrap -->
+
+<!-- ── SECOND SCREEN JUDGE DIALOG ───────────── -->
+<dialog class="judge-dialog" id="judgeDialog" aria-labelledby="judgeDialogTitle">
+  <div class="dialog-hd">
+    <div>
+      <span class="dialog-pill-tag">📱 Two-Phone Mode</span>
+      <h3 class="dialog-title" id="judgeDialogTitle">Opponent Judge Screen</h3>
+    </div>
+    <button class="pill-btn" id="btnCloseJudgeDialog" aria-label="Close dialog">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <p class="dialog-sub">
+    Scan with the phone of the team that's <strong>not guessing</strong>. They'll see the secret answer and can score shouts live!
+  </p>
+  <div class="qr-wrap">
+    <div id="judgeQrBox" class="qr-box"></div>
+    <div class="room-chip">Room Code: <strong id="roomCodeDisplay">----</strong></div>
+  </div>
+  <div class="judge-dialog-links">
+    <button class="btn btn-primary" id="btnCopyJudgeLink">📋 Copy Judge Link</button>
+    <a href="#" class="btn btn-ghost" id="linkOpenJudgeTab" target="_blank" rel="noopener">Open in New Tab ↗</a>
+  </div>
+  <div class="judge-peer-status" id="judgePeerStatus">
+    <span class="peer-dot" id="peerStatusDot"></span>
+    <span id="peerStatusText">Waiting for opponent phone to connect…</span>
+  </div>
+</dialog>
 
 <!-- ── HOW TO PLAY DIALOG ───────────────────── -->
 <dialog class="rules-dialog" id="rulesDialog" aria-labelledby="rulesTitle">
@@ -431,14 +550,22 @@
 <script src="js/deck.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/speech.js"></script>
+<script src="js/qrcode.min.js"></script>
+<script src="js/mqtt.min.js"></script>
+<script src="js/sync.js"></script>
 <script src="js/game.js"></script>
 
 <!-- Splash screen controller -->
 <script>
 (function () {
   const splash = document.getElementById('splashScreen');
-  const video  = document.getElementById('splashVideo');
-  if (!splash || !video) return;
+  if (!splash) return;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('role') === 'judge') {
+    splash.style.display = 'none';
+    return;
+  }
 
   let dismissed = false;
 
@@ -446,35 +573,26 @@
     if (dismissed) return;
     dismissed = true;
 
-    // Phase 1: trigger the CSS morph-to-nav animation
-    splash.classList.add('morphing');
+    // Trigger smooth flow directly into main hero logo
+    splash.classList.add('flowing');
 
-    // Phase 2: after morph completes, hide splash and reveal the intro screen
+    if (typeof showScreen === 'function') {
+      showScreen('intro');
+    }
+
     setTimeout(function () {
       splash.classList.add('done');
-      // Flow the intro animation in right after the splash morphs away
-      if (typeof showScreen === 'function') {
-        showScreen('intro');
-      }
-    }, 580); // matches splashMorph duration + tiny buffer
+    }, 600);
   }
 
-  video.addEventListener('ended', dismiss);
-  splash.addEventListener('click', dismiss);
+  // Auto-flow into the main page after 1.5s
+  const autoTimer = setTimeout(dismiss, 1600);
 
-  // Safety: fallback if video finishes or stalls (video duration is ~7.67s)
-  setTimeout(dismiss, 8500);
-
-  // If video fails to load/play, dismiss immediately
-  video.addEventListener('error', dismiss);
-
-  // Kick off autoplay safely across all browsers
-  const playPromise = video.play();
-  if (playPromise !== undefined) {
-    playPromise.catch(function () {
-      // Autoplay blocked by policy; tap-to-skip is active
-    });
-  }
+  // Or immediately on tap/click
+  splash.addEventListener('click', function() {
+    clearTimeout(autoTimer);
+    dismiss();
+  });
 })();
 </script>
 
