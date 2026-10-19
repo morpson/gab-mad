@@ -12,7 +12,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -395,29 +395,35 @@
 <script src="js/speech.js"></script>
 <script src="js/game.js"></script>
 
-<!-- Splash screen controller (inline, runs before game.js init matters) -->
+<!-- Splash screen controller -->
 <script>
 (function () {
-  const splash  = document.getElementById('splashScreen');
-  const video   = document.getElementById('splashVideo');
+  const splash = document.getElementById('splashScreen');
+  const video  = document.getElementById('splashVideo');
   if (!splash || !video) return;
 
+  let dismissed = false;
+
   function dismiss() {
-    splash.classList.add('done');
-    // Remove from DOM after fade so it can't block anything
-    splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+    if (dismissed) return;
+    dismissed = true;
+
+    // Phase 1: trigger the CSS morph-to-nav animation
+    splash.classList.add('morphing');
+
+    // Phase 2: after animation completes, hide entirely
+    setTimeout(function () {
+      splash.classList.add('done');
+    }, 580); // matches splashMorph duration + tiny buffer
   }
 
-  // Dismiss when video ends
   video.addEventListener('ended', dismiss);
-
-  // Dismiss on click/tap anywhere on splash
   splash.addEventListener('click', dismiss);
 
-  // Safety fallback: dismiss after 6 s even if video stalls
+  // Safety: dismiss after 6s regardless
   setTimeout(dismiss, 6000);
 
-  // If video can't play (no codec, blocked etc.) dismiss immediately
+  // If video fails to load/play, dismiss immediately
   video.addEventListener('error', dismiss);
 })();
 </script>

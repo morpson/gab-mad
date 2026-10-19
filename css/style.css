@@ -38,7 +38,7 @@
   --ink-3:         rgba(255, 244, 230, 0.36);
 
   /* Typography */
-  --font-display:  'Outfit', system-ui, sans-serif;
+  --font-display:  'Fredoka', system-ui, sans-serif;
   --font-body:     'Plus Jakarta Sans', system-ui, sans-serif;
 
   /* Radii */
@@ -82,7 +82,7 @@ body {
 }
 
 /* ==========================================================================
-   SPLASH SCREEN — logo video intro
+   SPLASH SCREEN — logo video intro → morphs into nav position
    ========================================================================== */
 #splashScreen {
   position: fixed;
@@ -94,13 +94,43 @@ body {
   justify-content: center;
   flex-direction: column;
   gap: 0;
-  transition: opacity .55s ease, visibility .55s ease;
+  /* no transition here — JS handles the morph via .morphing + .done */
 }
 
-#splashScreen.done {
-  opacity: 0;
-  visibility: hidden;
+/* Phase 1: morphing — logo slides up-left and shrinks toward nav position */
+#splashScreen.morphing {
+  background: transparent;
   pointer-events: none;
+}
+
+#splashScreen.morphing #splashVideo {
+  /* Move from center toward top-left where the nav logo lives.
+     Values are approximations that feel right across screen sizes;
+     the nav logo is ~20px from left, ~29px from top, ~42px tall.
+     We scale from ~260px wide (90vw capped) to 42px tall (~160px wide). */
+  animation: splashMorph .55s cubic-bezier(.4, 0, .2, 1) forwards;
+}
+
+@keyframes splashMorph {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    /* Translate from center to top-left nav position */
+    transform:
+      translate(
+        calc(-50vw + 100px),
+        calc(-50vh + 36px)
+      )
+      scale(0.18);
+    opacity: 0;
+  }
+}
+
+/* Phase 2: fully gone */
+#splashScreen.done {
+  display: none;
 }
 
 /* The video — mix-blend-mode:lighten kills the black bg */
@@ -110,19 +140,22 @@ body {
   mix-blend-mode: lighten;
   pointer-events: none;
   display: block;
+  transform-origin: center center;
 }
 
 .splash-tap {
   font-family: var(--font-body);
-  font-size: .9rem;
+  font-size: .85rem;
   font-weight: 700;
   color: var(--cream-dim);
   letter-spacing: .08em;
   text-transform: uppercase;
-  margin-top: 32px;
+  margin-top: 28px;
   opacity: 0;
-  animation: tapFade 1.2s ease 1.4s forwards;
+  animation: tapFade 1s ease 1.2s forwards;
 }
+
+.morphing .splash-tap { display: none; }
 
 @keyframes tapFade {
   from { opacity: 0; transform: translateY(8px); }
@@ -188,7 +221,7 @@ body {
   z-index: 1;
   max-width: 900px;
   margin: 0 auto;
-  padding: 18px 20px 60px;
+  padding: 14px 16px 48px;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -210,8 +243,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
 /* Logo image in nav */
@@ -224,30 +257,30 @@ body {
 }
 
 .brand-logo-img {
-  height: 42px;
+  height: 36px;
   width: auto;
   display: block;
-  filter: drop-shadow(0 2px 12px var(--orange-glow));
+  filter: drop-shadow(0 2px 10px var(--orange-glow));
   transition: filter .25s, transform .22s var(--ease-spring);
 }
 
 .brand:hover .brand-logo-img {
-  filter: drop-shadow(0 3px 22px var(--orange-glow));
+  filter: drop-shadow(0 3px 20px var(--orange-glow));
   transform: scale(1.05);
 }
 
 .nav-pills {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .pill-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--r-pill);
   border: 1px solid var(--surface-border);
   background: var(--surface);
@@ -380,8 +413,8 @@ body {
 #introScreen {
   align-items: center;
   justify-content: flex-start;
-  padding-top: 8px;
-  gap: 24px;
+  padding-top: 4px;
+  gap: 16px;
 }
 
 /* ── Hero area: logo image (large) + tagline ── */
@@ -389,25 +422,33 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   text-align: center;
   width: 100%;
 }
 
 .intro-logo-img {
-  width: min(360px, 80vw);
+  width: min(300px, 72vw);
   height: auto;
-  filter: drop-shadow(0 8px 32px var(--orange-glow)) drop-shadow(0 2px 8px var(--gold-glow));
+  filter: drop-shadow(0 6px 24px var(--orange-glow)) drop-shadow(0 2px 6px var(--gold-glow));
   animation: logoBob 3.5s ease-in-out infinite;
+  /* starts invisible, fades in after splash morph */
+  opacity: 0;
+  animation: logoAppear .5s ease .1s forwards, logoBob 3.5s ease-in-out 0.7s infinite;
+}
+
+@keyframes logoAppear {
+  from { opacity: 0; transform: scale(.85); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 @keyframes logoBob {
-  0%, 100% { transform: translateY(0) rotate(-.5deg); }
-  50%       { transform: translateY(-8px) rotate(.5deg); }
+  0%, 100% { transform: translateY(0) rotate(-.4deg); }
+  50%       { transform: translateY(-6px) rotate(.4deg); }
 }
 
 .intro-game-sub {
-  font-size: 1.05rem;
+  font-size: .92rem;
   color: var(--cream-dim);
   font-style: italic;
   letter-spacing: .01em;
@@ -416,19 +457,19 @@ body {
 /* ── Overview carousel cards ── */
 .intro-steps-container {
   width: 100%;
-  max-width: 640px;
+  max-width: 620px;
   position: relative;
   overflow: hidden;
-  min-height: 340px;
+  min-height: 300px;
 }
 
 .intro-step {
   display: none;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   text-align: center;
-  padding: 32px 30px 28px;
+  padding: 24px 24px 20px;
 }
 
 .intro-step.active {
@@ -437,12 +478,12 @@ body {
 }
 
 @keyframes stepPop {
-  from { opacity: 0; transform: translateY(22px) scale(.95); }
+  from { opacity: 0; transform: translateY(18px) scale(.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .step-emoji {
-  font-size: 3.4rem;
+  font-size: 2.8rem;
   line-height: 1;
   animation: emojiWiggle .55s var(--ease-spring) .15s both;
 }
@@ -454,8 +495,8 @@ body {
 }
 
 .step-label {
-  font-size: .75rem;
-  font-weight: 900;
+  font-size: .72rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .16em;
   color: var(--orange);
@@ -463,18 +504,18 @@ body {
 
 .step-heading {
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 4vw, 1.9rem);
-  font-weight: 900;
-  letter-spacing: -.025em;
-  line-height: 1.1;
+  font-size: clamp(1.2rem, 3.5vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1.15;
   color: var(--ink);
 }
 
 .step-body {
-  font-size: 1rem;
+  font-size: .93rem;
   color: var(--ink-2);
-  line-height: 1.7;
-  max-width: 480px;
+  line-height: 1.65;
+  max-width: 440px;
 }
 
 .step-body em {
@@ -488,32 +529,32 @@ body {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   background: rgba(244, 123, 32, 0.10);
-  border: 1px solid rgba(244, 123, 32, 0.30);
+  border: 1px solid rgba(244, 123, 32, 0.28);
   border-radius: var(--r-lg);
-  padding: 14px 22px;
+  padding: 12px 20px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
 .example-gab {
   font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 900;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--orange-light);
   letter-spacing: .02em;
 }
 
 .example-arrow {
-  font-size: 1.1rem;
-  opacity: .45;
+  font-size: 1rem;
+  opacity: .4;
 }
 
 .example-answer {
   font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 800;
+  font-size: .95rem;
+  font-weight: 700;
   color: var(--gold-light);
 }
 
@@ -547,9 +588,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 12px;
   flex-wrap: wrap;
-  padding-bottom: 8px;
+  padding-bottom: 4px;
 }
 
 /* ==========================================================================
@@ -1484,13 +1525,24 @@ button:focus-visible {
    RESPONSIVE
    ========================================================================== */
 @media (max-width: 500px) {
-  .intro-logo-img { width: min(280px, 85vw); }
-  .action-bar { gap: 7px; }
-  .action-bar .btn { padding: 10px 14px; font-size: .83rem; }
+  .app-wrap { padding: 10px 12px 40px; }
+  .top-nav { margin-bottom: 10px; }
+  .brand-logo-img { height: 30px; }
+  .pill-btn { width: 34px; height: 34px; }
+  .intro-logo-img { width: min(240px, 78vw); }
+  #introScreen { gap: 12px; }
+  .intro-steps-container { min-height: 280px; }
+  .step-emoji { font-size: 2.2rem; }
+  .intro-dots { margin-top: 2px; }
+  .action-bar { gap: 6px; }
+  .action-bar .btn { padding: 9px 12px; font-size: .82rem; }
   .setup-grid { grid-template-columns: 1fr; }
+  .setup-hero { padding: 0; }
+  .panel { padding: 16px 14px; gap: 10px; }
   .team-row { padding: 8px 11px; gap: 8px; }
-  .team-avatar-select { max-width: 94px; padding: 7px 6px; }
-  .history-panel { padding: 16px; }
+  .team-avatar-select { max-width: 86px; padding: 6px 5px; }
+  .history-panel { padding: 14px; }
+  .btn-mega { font-size: 1.2rem; padding: 17px 36px; }
 }
 
 /* ==========================================================================
