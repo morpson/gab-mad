@@ -14,20 +14,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=4" />
 </head>
-<body>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     SPLASH SCREEN — Animated static logo entrance → flows into hero
-     ═══════════════════════════════════════════════════════════════ -->
-<div id="splashScreen" role="presentation" aria-hidden="true">
-  <div class="splash-logo-stage">
-    <div class="splash-glow-ring"></div>
-    <img src="logo.PNG" alt="GabMad" class="splash-logo-img" id="splashLogoImg" />
-  </div>
-  <p class="splash-tap">tap anywhere to start</p>
-</div>
+<body class="intro-splash-active">
 
 <!-- Animated background blobs -->
 <div class="blob-layer" aria-hidden="true">
@@ -46,45 +35,45 @@
   <header class="top-nav" id="topNav">
     <div class="nav-spacer" aria-hidden="true"></div>
 
-    <div class="nav-pills">
-      <button class="pill-btn glow-cyan" id="btnJudgeModal" title="Opponent / Judge Screen" aria-label="Opponent Judge Screen">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <nav class="nav-dock" aria-label="Controls">
+      <button class="dock-btn" id="btnJudgeModal" title="Opponent / Judge Screen (Two-Phone Mode)" aria-label="Opponent Judge Screen">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
           <line x1="12" y1="18" x2="12.01" y2="18"/>
         </svg>
         <span class="judge-badge-dot" id="judgeBadgeDot" title="Opponent screen status"></span>
       </button>
 
-      <button class="pill-btn glow-gold" id="btnOpenRules" title="How to play" aria-label="How to play">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <button class="dock-btn" id="btnOpenRules" title="How to play" aria-label="How to play">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/>
         </svg>
       </button>
 
-      <button class="pill-btn glow-gold" id="btnToggleMusic" title="Toggle music" aria-label="Toggle lo-fi music" aria-pressed="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <button class="dock-btn active" id="btnToggleMusic" title="Toggle music" aria-label="Toggle music" aria-pressed="true">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
         </svg>
       </button>
 
-      <button class="pill-btn glow-orange" id="btnToggleSfx" title="Toggle sound FX" aria-label="Toggle sound effects" aria-pressed="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <button class="dock-btn active" id="btnToggleSfx" title="Toggle sound FX" aria-label="Toggle sound effects" aria-pressed="true">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/>
         </svg>
       </button>
 
-      <button class="pill-btn" id="btnToggleTheme" title="Toggle light/dark" aria-label="Toggle theme">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      <button class="dock-btn" id="btnToggleTheme" title="Switch to light mode" aria-label="Switch to light mode">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
         </svg>
       </button>
 
-      <button class="pill-btn" id="btnQuitGame" title="Quit to setup" aria-label="Quit game" style="display:none">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <button class="dock-btn" id="btnQuitGame" title="Quit to setup" aria-label="Quit game" style="display:none">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
-    </div>
+    </nav>
   </header>
 
   <!-- ── SCOREBOARD HUD ─────────────────────── -->
@@ -93,12 +82,14 @@
   <!-- ═══════════════════════════════════════════
        INTRO / OVERVIEW SCREEN
        ═══════════════════════════════════════════ -->
-  <section class="screen active screen-enter" id="introScreen" aria-label="Game overview">
+  <section class="screen active screen-enter intro-splash-state" id="introScreen" aria-label="Game overview">
 
-    <!-- Big logo as hero -->
-    <div class="intro-hero">
-      <img src="logo.PNG" alt="GabMad" class="intro-logo-img" />
+    <!-- Big logo as hero with radial bloom aura -->
+    <div class="intro-hero" id="introHero">
+      <div class="intro-hero-glow" aria-hidden="true"></div>
+      <img src="logo.PNG" alt="GabMad" class="intro-logo-img" id="introLogoImg" />
       <p class="intro-game-sub">(it's MadGab, but free)</p>
+      <p class="intro-tap-hint" aria-hidden="true">tap anywhere to begin</p>
     </div>
 
     <!-- Carousel cards -->
@@ -196,11 +187,11 @@
       </button>
       <button class="setup-step" data-step="2" role="tab" aria-selected="false">
         <span class="setup-step-num">2</span>
-        <span class="setup-step-label">Game options</span>
+        <span class="setup-step-label">Options</span>
       </button>
       <button class="setup-step setup-step-final" data-step="3" role="tab" aria-selected="false">
         <span class="setup-step-num">3</span>
-        <span class="setup-step-label">Review & start</span>
+        <span class="setup-step-label">Review</span>
       </button>
     </div>
 
@@ -279,9 +270,6 @@
       <button class="btn btn-primary" id="setupBtnNext">Next →</button>
       <button class="btn btn-mega setup-start-btn" id="btnStart" style="display:none">🚀 Start the Show</button>
     </div>
-    <p class="kbd-hint">
-      <kbd>Space</kbd> Flip &bull; <kbd>H</kbd> Hint &bull; <kbd>S</kbd> Read aloud &bull; <kbd>M</kbd> Mic &bull; <kbd>P</kbd> Pause &bull; <kbd>1–4</kbd> Score
-    </p>
 
   </section>
 
@@ -372,6 +360,10 @@
         <button class="btn btn-primary" id="btnNext">Next Card ➡️</button>
       </div>
     </div>
+
+    <p class="kbd-hint desktop-only-kbd">
+      <kbd>Space</kbd> Flip &bull; <kbd>H</kbd> Hint &bull; <kbd>S</kbd> Read aloud &bull; <kbd>M</kbd> Mic &bull; <kbd>P</kbd> Pause &bull; <kbd>1–4</kbd> Score
+    </p>
 
   </section>
 
@@ -547,54 +539,13 @@
 </dialog>
 
 <!-- ── SCRIPTS ─────────────────────────────── -->
-<script src="js/deck.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/speech.js"></script>
-<script src="js/qrcode.min.js"></script>
-<script src="js/mqtt.min.js"></script>
-<script src="js/sync.js"></script>
-<script src="js/game.js"></script>
-
-<!-- Splash screen controller -->
-<script>
-(function () {
-  const splash = document.getElementById('splashScreen');
-  if (!splash) return;
-
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('role') === 'judge') {
-    splash.style.display = 'none';
-    return;
-  }
-
-  let dismissed = false;
-
-  function dismiss() {
-    if (dismissed) return;
-    dismissed = true;
-
-    // Trigger smooth flow directly into main hero logo
-    splash.classList.add('flowing');
-
-    if (typeof showScreen === 'function') {
-      showScreen('intro');
-    }
-
-    setTimeout(function () {
-      splash.classList.add('done');
-    }, 600);
-  }
-
-  // Auto-flow into the main page after 1.5s
-  const autoTimer = setTimeout(dismiss, 1600);
-
-  // Or immediately on tap/click
-  splash.addEventListener('click', function() {
-    clearTimeout(autoTimer);
-    dismiss();
-  });
-})();
-</script>
+<script src="js/deck.js?v=4"></script>
+<script src="js/audio.js?v=4"></script>
+<script src="js/speech.js?v=4"></script>
+<script src="js/qrcode.min.js?v=4"></script>
+<script src="js/mqtt.min.js?v=4"></script>
+<script src="js/sync.js?v=4"></script>
+<script src="js/game.js?v=4"></script>
 
 </body>
 </html>

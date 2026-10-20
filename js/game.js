@@ -83,12 +83,54 @@ const $ = id => document.getElementById(id);
 
 function applyTheme(t) {
   state.theme = t;
-  if (t === "light") {
-    document.documentElement.setAttribute("data-theme","light");
+  const isLight = t === "light";
+  if (isLight) {
+    document.documentElement.setAttribute("data-theme", "light");
   } else {
     document.documentElement.removeAttribute("data-theme");
   }
   localStorage.setItem("gabmad_theme", t);
+
+  const themeBtn = $("btnToggleTheme");
+  if (themeBtn) {
+    themeBtn.setAttribute("aria-label", isLight ? "Switch to dark mode" : "Switch to light mode");
+    themeBtn.setAttribute("title", isLight ? "Switch to dark mode" : "Switch to light mode");
+    themeBtn.innerHTML = isLight
+      ? `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
+      : `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+  }
+}
+
+/* ── CINEMATIC INTRO FLOW ───────────────────── */
+function initIntroFlow() {
+  const intro = $("introScreen");
+  if (!intro) return;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("role") === "judge") {
+    intro.classList.remove("intro-splash-state");
+    intro.classList.add("intro-flowed");
+    document.body.classList.remove("intro-splash-active");
+    return;
+  }
+
+  let flowed = false;
+  function triggerFlow() {
+    if (flowed) return;
+    flowed = true;
+    intro.classList.remove("intro-splash-state");
+    intro.classList.add("intro-flowed");
+    document.body.classList.remove("intro-splash-active");
+  }
+
+  // Smoothly glide into home position after 1.35s
+  const timer = setTimeout(triggerFlow, 1350);
+
+  // Or immediately on tap/click anywhere
+  intro.addEventListener("click", () => {
+    clearTimeout(timer);
+    triggerFlow();
+  }, { once: true });
 }
 
 /* ── INTRO CONTROLLER ───────────────────────── */
@@ -943,57 +985,83 @@ function bindSpeech() {
 
 /* ── NAV & MISC BINDINGS ────────────────────── */
 function bindNav() {
-  $("brandHome").addEventListener("click", e => {
-    e.preventDefault();
-    if (state.screen === "intro") return;
-    showScreen("setup");
-  });
+  const brand = $("brandHome");
+  if (brand) {
+    brand.addEventListener("click", e => {
+      e.preventDefault();
+      if (state.screen === "intro") return;
+      showScreen("setup");
+    });
+  }
 
-  $("btnOpenRules").addEventListener("click", () => {
-    if (window.gabAudio) window.gabAudio.click();
-    $("rulesDialog").showModal();
-  });
+  const btnRules = $("btnOpenRules");
+  if (btnRules) {
+    btnRules.addEventListener("click", () => {
+      if (window.gabAudio) window.gabAudio.click();
+      const dlg = $("rulesDialog");
+      if (dlg) dlg.showModal();
+    });
+  }
 
-  $("btnCloseRules").addEventListener("click", () => {
-    if (window.gabAudio) window.gabAudio.click();
-    $("rulesDialog").close();
-  });
+  const btnCloseRules = $("btnCloseRules");
+  if (btnCloseRules) {
+    btnCloseRules.addEventListener("click", () => {
+      if (window.gabAudio) window.gabAudio.click();
+      const dlg = $("rulesDialog");
+      if (dlg) dlg.close();
+    });
+  }
 
-  $("rulesDialog").addEventListener("click", e => {
-    const r = $("rulesDialog").getBoundingClientRect();
-    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
-      $("rulesDialog").close();
-    }
-  });
+  const rulesDlg = $("rulesDialog");
+  if (rulesDlg) {
+    rulesDlg.addEventListener("click", e => {
+      const r = rulesDlg.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
+        rulesDlg.close();
+      }
+    });
+  }
 
-  $("btnToggleMusic").addEventListener("click", () => {
-    if (!window.gabAudio) return;
-    const on = !window.gabAudio.musicEnabled;
-    window.gabAudio.setMusicEnabled(on);
-    $("btnToggleMusic").classList.toggle("glow-green", on);
-    $("btnToggleMusic").setAttribute("aria-pressed", on);
-  });
+  const btnMusic = $("btnToggleMusic");
+  if (btnMusic) {
+    btnMusic.addEventListener("click", () => {
+      if (!window.gabAudio) return;
+      const on = !window.gabAudio.musicEnabled;
+      window.gabAudio.setMusicEnabled(on);
+      btnMusic.classList.toggle("active", on);
+      btnMusic.setAttribute("aria-pressed", on);
+    });
+  }
 
-  $("btnToggleSfx").addEventListener("click", () => {
-    if (!window.gabAudio) return;
-    const on = !window.gabAudio.sfxEnabled;
-    window.gabAudio.setSfxEnabled(on);
-    $("btnToggleSfx").classList.toggle("glow-orange", on);
-    $("btnToggleSfx").setAttribute("aria-pressed", on);
-  });
+  const btnSfx = $("btnToggleSfx");
+  if (btnSfx) {
+    btnSfx.addEventListener("click", () => {
+      if (!window.gabAudio) return;
+      const on = !window.gabAudio.sfxEnabled;
+      window.gabAudio.setSfxEnabled(on);
+      btnSfx.classList.toggle("active", on);
+      btnSfx.setAttribute("aria-pressed", on);
+    });
+  }
 
-  $("btnToggleTheme").addEventListener("click", () => {
-    applyTheme(state.theme === "dark" ? "light" : "dark");
-    if (window.gabAudio) window.gabAudio.click();
-  });
+  const btnTheme = $("btnToggleTheme");
+  if (btnTheme) {
+    btnTheme.addEventListener("click", () => {
+      applyTheme(state.theme === "dark" ? "light" : "dark");
+      if (window.gabAudio) window.gabAudio.click();
+    });
+  }
 
-  $("btnQuitGame").addEventListener("click", () => {
-    if (!confirm("End the current game?")) return;
-    stopTimer();
-    if (window.gabSpeech) window.gabSpeech.stop();
-    if (window.gabAudio) window.gabAudio.setMusicMode("chill");
-    showScreen("setup");
-  });
+  const btnQuit = $("btnQuitGame");
+  if (btnQuit) {
+    btnQuit.addEventListener("click", () => {
+      if (!confirm("End the current game?")) return;
+      stopTimer();
+      if (window.gabSpeech) window.gabSpeech.stop();
+      if (window.gabAudio) window.gabAudio.setMusicMode("chill");
+      showScreen("setup");
+    });
+  }
 }
 
 function bindGame() {
@@ -1347,11 +1415,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("role") === "judge") {
-    const splash = $("splashScreen");
-    if (splash) splash.remove();
     initJudgeMode(urlParams.get("room") || "");
     return;
   }
+
+  initIntroFlow();
 
   bindIntro();
   bindSetup();
