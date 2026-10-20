@@ -391,7 +391,6 @@ function renderTeamInputs() {
     customLabel.appendChild(customInput);
     customLabel.insertAdjacentHTML("beforeend", `<span class="custom-color-icon" aria-hidden="true">🎨</span>`);
 
-    colorRow.appendChild(swatchBtn);
     colorRow.appendChild(palette);
     colorRow.appendChild(customLabel);
 
