@@ -276,8 +276,9 @@ function renderTeamInputs() {
 
     const row = document.createElement("div");
     row.className = "team-row team-row-stacked";
-    row.dataset.teamIndex  = i;
+    row.dataset.teamIndex   = i;
     row.dataset.chosenColor = chosenColor;
+    row.style.setProperty("--team-color", chosenColor);
 
     /* ── Top line: avatar picker + name input ── */
     const topLine = document.createElement("div");
@@ -344,6 +345,7 @@ function renderTeamInputs() {
 
     function applyColor(color) {
       row.dataset.chosenColor = color;
+      row.style.setProperty("--team-color", color);
       swatchBtn.style.background = color;
       swatchBtn.style.boxShadow  = `0 0 10px ${color}88`;
       customInput.value = color;
@@ -932,7 +934,6 @@ function buildScoreGrid() {
     const card = document.createElement("div");
     card.className = "score-card";
     card.style.setProperty("--team-color", t.color);
-    card.style.borderColor = `${t.color}44`;
 
     const info = document.createElement("div");
     info.className = "score-info";
@@ -1051,10 +1052,6 @@ function endGame() {
     const row = document.createElement("div");
     row.className = "podium-row" + (i === 0 ? " first" : "");
     row.style.setProperty("--team-color", t.color);
-    if (i === 0) {
-      row.style.borderColor = `${t.color}88`;
-      row.style.boxShadow   = `0 0 24px ${t.color}44`;
-    }
 
     const rank = document.createElement("span");
     rank.className = "podium-rank";
@@ -1512,8 +1509,9 @@ function renderJudgeState(remote) {
     remote.teams.forEach(t => {
       const chip = document.createElement("div");
       chip.className = "judge-score-chip";
+      chip.style.setProperty("--team-color", t.color);
       chip.innerHTML = `
-        <span class="chip-dot" style="background:${t.color}; box-shadow:0 0 8px ${t.color}88"></span>
+        <span class="chip-dot" style="background:${t.color}; box-shadow:0 0 6px ${t.color}88"></span>
         <span class="chip-name">${t.avatar ? t.avatar + " " : ""}${t.name}</span>
         <span class="chip-score">${t.score || 0}</span>
       `;
