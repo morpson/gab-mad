@@ -344,15 +344,32 @@ function renderTeamInputs() {
     palette.className = "team-color-palette";
 
     function applyColor(color) {
+      // Swap: if another team row already has this color, give them our old color
+      const list = $("teamsList");
+      if (list) {
+        const oldColor = row.dataset.chosenColor;
+        Array.from(list.children).forEach(otherRow => {
+          if (otherRow !== row && otherRow.dataset.chosenColor === color) {
+            // Give that row our previous color
+            otherRow.dataset.chosenColor = oldColor;
+            otherRow.style.setProperty("--team-color", oldColor);
+            // Update its swatch, custom input, and chip selected states
+            const otherCustom = otherRow.querySelector(".team-color-custom");
+            if (otherCustom) otherCustom.value = oldColor;
+            otherRow.querySelectorAll(".color-chip").forEach(c => {
+              c.classList.toggle("selected", c.dataset.color === oldColor);
+            });
+          }
+        });
+      }
+
       row.dataset.chosenColor = color;
       row.style.setProperty("--team-color", color);
-      swatchBtn.style.background = color;
-      swatchBtn.style.boxShadow  = `0 0 10px ${color}88`;
       customInput.value = color;
-      // Update selected state on chips
       palette.querySelectorAll(".color-chip").forEach(c => {
         c.classList.toggle("selected", c.dataset.color === color);
       });
+
       // Ensure audio context is unlocked on any interaction
       if (window.gabAudio) {
         window.gabAudio.getContext();

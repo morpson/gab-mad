@@ -1282,8 +1282,18 @@ body.intro-splash-active .top-nav {
 
 /* Avatar with team color glow — used in HUD, score cards, podium */
 .team-avatar-colored {
-  filter: drop-shadow(0 0 5px var(--team-color, transparent));
-  transition: filter .25s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--team-color, transparent) 28%, transparent);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--team-color, transparent) 50%, transparent);
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background .25s, box-shadow .25s;
 }
 
 /* Start section */
