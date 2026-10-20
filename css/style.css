@@ -854,7 +854,6 @@ body.intro-splash-active .top-nav {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-}
 
 /* ── Step panels ── */
 .setup-panels {
@@ -904,13 +903,51 @@ body.intro-splash-active .top-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
   padding: 10px 14px;
   background: rgba(255, 160, 50, 0.06);
   border: 1px solid var(--surface-border);
   border-radius: var(--r-md);
+  flex-wrap: wrap;
 }
-.review-row .review-label { color: var(--ink-2); font-size: .9rem; }
+.review-row .review-label { color: var(--ink-2); font-size: .9rem; flex-shrink: 0; }
 .review-row .review-value { color: var(--ink); font-weight: 800; font-family: var(--font-display); }
+
+.review-teams-value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.review-team-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 6px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--team-color, var(--surface-border));
+  background: rgba(255, 255, 255, 0.05);
+  font-size: .82rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+.review-team-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.review-team-avatar {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.review-team-name {
+  color: var(--ink);
+}
 
 /* Hide the old one-shot start section when multi-step is active */
 .setup-start { display: none; }
@@ -1006,6 +1043,10 @@ body.intro-splash-active .top-nav {
   gap: 9px;
 }
 
+.team-row-stacked:focus-within {
+  border-radius: var(--r-lg);
+}
+
 .team-row-top {
   display: flex;
   align-items: center;
@@ -1099,7 +1140,8 @@ body.intro-splash-active .top-nav {
 
 .team-avatar-select {
   flex: 0 0 auto;
-  max-width: 110px;
+  min-width: 100px;
+  max-width: 140px;
   padding: 7px 10px;
   border: 1px solid var(--surface-border);
   border-radius: var(--r-pill);
@@ -1109,6 +1151,15 @@ body.intro-splash-active .top-nav {
   font-size: .8rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.team-avatar-select optgroup {
+  background: #171B28;
+  color: var(--ink-2);
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
 }
 
 .team-avatar-select option,

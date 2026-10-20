@@ -347,10 +347,18 @@ function renderTeamInputs() {
       swatchBtn.style.background = color;
       swatchBtn.style.boxShadow  = `0 0 10px ${color}88`;
       customInput.value = color;
-      // Update focus ring on chips
+      // Update selected state on chips
       palette.querySelectorAll(".color-chip").forEach(c => {
         c.classList.toggle("selected", c.dataset.color === color);
       });
+      // Ensure audio context is unlocked on any interaction
+      if (window.gabAudio) {
+        window.gabAudio.getContext();
+        if (window.gabAudio.musicEnabled && !window.gabAudio.musicStarted) {
+          window.gabAudio.startMusic();
+        }
+        window.gabAudio.click();
+      }
     }
 
     TEAM_COLOR_PALETTE.forEach(hex => {
@@ -516,7 +524,27 @@ function recordCompletedGame() {
 
 /* ── MULTI-STEP SETUP ───────────────────────── */
 
+function flushTeamDrafts() {
+  const list = $("teamsList");
+  if (!list) return;
+  Array.from(list.children).forEach((row, i) => {
+    const input  = row.querySelector(".team-inp");
+    const avatar = row.querySelector(".team-avatar-select");
+    const color  = row.dataset.chosenColor;
+    if (input) {
+      state.teamDrafts[i] = Object.assign({}, state.teamDrafts[i] || {}, {
+        name:   input.value,
+        avatar: avatar ? avatar.value : (state.teamDrafts[i] ? state.teamDrafts[i].avatar : ""),
+        color:  color  || (state.teamDrafts[i] ? state.teamDrafts[i].color : TEAM_DEFAULTS[i].color)
+      });
+    }
+  });
+}
+
 function gotoSetupStep(n) {
+  // Flush current team drafts before leaving step 1
+  if (state.setupStep === 1) flushTeamDrafts();
+
   state.setupStep = Math.max(1, Math.min(3, n));
 
   // Update step tabs
@@ -559,17 +587,27 @@ function buildSetupReview() {
   const timerSecs = state.timerSecs;
   const cardLimit = state.cardLimit === 9999 ? "All" : state.cardLimit;
   const category = state.category;
+  const rows = $("teamsList") ? Array.from($("teamsList").children) : [];
 
-  const teamNames = [];
-  for (let i = 0; i < teamCount; i++) {
-    const inp = $(`tinp${i}`);
-    teamNames.push((inp && inp.value.trim()) || TEAM_DEFAULTS[i].name);
-  }
+  // Build teams section with swatches + avatars
+  const teamsHtml = Array.from({ length: teamCount }, (_, i) => {
+    const inp    = $(`tinp${i}`);
+    const avSel  = $(`tavatar${i}`);
+    const row    = rows[i];
+    const name   = (inp && inp.value.trim()) || TEAM_DEFAULTS[i].name;
+    const avatar = avSel ? avSel.value : "";
+    const color  = (row && row.dataset.chosenColor) ? row.dataset.chosenColor : TEAM_DEFAULTS[i].color;
+    return `<span class="review-team-chip" style="--team-color:${color}">
+      <span class="review-team-dot" style="background:${color};box-shadow:0 0 7px ${color}88"></span>
+      ${avatar ? `<span class="review-team-avatar">${avatar}</span>` : ""}
+      <span class="review-team-name">${name}</span>
+    </span>`;
+  }).join("");
 
   review.innerHTML = `
     <div class="review-row">
       <span class="review-label">Teams</span>
-      <span class="review-value">${teamNames.join(" · ")}</span>
+      <span class="review-value review-teams-value">${teamsHtml}</span>
     </div>
     <div class="review-row">
       <span class="review-label">Timer per card</span>
