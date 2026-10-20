@@ -13,14 +13,57 @@ const TEAM_DEFAULTS = [
 ];
 
 const TEAM_AVATARS = [
-  { emoji: "", label: "No avatar" },
-  { emoji: "🦊", label: "Fox" },
-  { emoji: "🐸", label: "Frog" },
-  { emoji: "🦄", label: "Unicorn" },
-  { emoji: "🐙", label: "Octopus" },
-  { emoji: "🦉", label: "Owl" },
-  { emoji: "🐼", label: "Panda" },
-  { emoji: "🦖", label: "Dinosaur" }
+  { emoji: "",   label: "No avatar",   group: "" },
+  // Animals
+  { emoji: "🦊", label: "Fox",        group: "Animals" },
+  { emoji: "🐸", label: "Frog",       group: "Animals" },
+  { emoji: "🦄", label: "Unicorn",    group: "Animals" },
+  { emoji: "🐙", label: "Octopus",    group: "Animals" },
+  { emoji: "🦉", label: "Owl",        group: "Animals" },
+  { emoji: "🐼", label: "Panda",      group: "Animals" },
+  { emoji: "🦖", label: "Dinosaur",   group: "Animals" },
+  { emoji: "🐺", label: "Wolf",       group: "Animals" },
+  { emoji: "🐯", label: "Tiger",      group: "Animals" },
+  { emoji: "🦋", label: "Butterfly",  group: "Animals" },
+  { emoji: "🐬", label: "Dolphin",    group: "Animals" },
+  { emoji: "🦈", label: "Shark",      group: "Animals" },
+  { emoji: "🦁", label: "Lion",       group: "Animals" },
+  { emoji: "🐉", label: "Dragon",     group: "Animals" },
+  { emoji: "🦅", label: "Eagle",      group: "Animals" },
+  // Food & Party
+  { emoji: "🍕", label: "Pizza",      group: "Food" },
+  { emoji: "🌮", label: "Taco",       group: "Food" },
+  { emoji: "🍩", label: "Donut",      group: "Food" },
+  { emoji: "🌶️", label: "Hot Pepper", group: "Food" },
+  { emoji: "🧁", label: "Cupcake",    group: "Food" },
+  { emoji: "🍟", label: "Fries",      group: "Food" },
+  // Fun & Misc
+  { emoji: "🚀", label: "Rocket",     group: "Fun" },
+  { emoji: "👾", label: "Alien Bug",  group: "Fun" },
+  { emoji: "🎸", label: "Guitar",     group: "Fun" },
+  { emoji: "💀", label: "Skull",      group: "Fun" },
+  { emoji: "🔥", label: "Fire",       group: "Fun" },
+  { emoji: "⚡", label: "Lightning",  group: "Fun" },
+  { emoji: "💎", label: "Diamond",    group: "Fun" },
+  { emoji: "🎯", label: "Bullseye",   group: "Fun" },
+  { emoji: "🧠", label: "Brain",      group: "Fun" },
+  { emoji: "🏆", label: "Trophy",     group: "Fun" },
+];
+
+// Preset team color palette
+const TEAM_COLOR_PALETTE = [
+  "#ff5e1a", // Burnt Orange
+  "#ffd23f", // Gold
+  "#00b4ff", // Cyan
+  "#3ef5c8", // Mint
+  "#d946ef", // Purple
+  "#f72585", // Hot Pink
+  "#10b981", // Emerald
+  "#6366f1", // Indigo
+  "#fb923c", // Peach
+  "#facc15", // Yellow
+  "#38bdf8", // Sky
+  "#a3e635", // Lime
 ];
 
 const HISTORY_STORAGE_KEY = "gabmad_team_history";
@@ -209,26 +252,67 @@ function showScreen(name) {
 function renderTeamInputs() {
   const list = $("teamsList");
   if (!list) return;
+
+  // Persist current values before re-rendering
   Array.from(list.children).forEach((row, i) => {
-    const input = row.querySelector(".team-inp");
+    const input  = row.querySelector(".team-inp");
     const avatar = row.querySelector(".team-avatar-select");
-    if (input && avatar) {
-      state.teamDrafts[i] = { name: input.value, avatar: avatar.value };
+    const color  = row.dataset.chosenColor;
+    if (input) {
+      state.teamDrafts[i] = Object.assign({}, state.teamDrafts[i] || {}, {
+        name:   input.value,
+        avatar: avatar ? avatar.value : (state.teamDrafts[i] ? state.teamDrafts[i].avatar : ""),
+        color:  color  || (state.teamDrafts[i] ? state.teamDrafts[i].color : TEAM_DEFAULTS[i].color)
+      });
     }
   });
 
   list.innerHTML = "";
-  for (let i = 0; i < state.teamCount; i++) {
-    const def = TEAM_DEFAULTS[i];
-    const draft = state.teamDrafts[i] || { name: def.name, avatar: "" };
-    const row = document.createElement("div");
-    row.className = "team-row";
-    row.dataset.teamIndex = i;
 
-    const sw = document.createElement("span");
-    sw.className = "team-swatch";
-    sw.style.background = def.color;
-    sw.style.boxShadow = `0 0 10px ${def.color}88`;
+  for (let i = 0; i < state.teamCount; i++) {
+    const def   = TEAM_DEFAULTS[i];
+    const draft = state.teamDrafts[i] || {};
+    const chosenColor = draft.color || def.color;
+
+    const row = document.createElement("div");
+    row.className = "team-row team-row-stacked";
+    row.dataset.teamIndex  = i;
+    row.dataset.chosenColor = chosenColor;
+
+    /* ── Top line: avatar picker + name input ── */
+    const topLine = document.createElement("div");
+    topLine.className = "team-row-top";
+
+    // Avatar <select> with optgroups
+    const avatar = document.createElement("select");
+    avatar.className = "team-avatar-select";
+    avatar.id = `tavatar${i}`;
+    avatar.setAttribute("aria-label", `Team ${i + 1} avatar`);
+
+    // "No avatar" option
+    const blankOpt = document.createElement("option");
+    blankOpt.value = "";
+    blankOpt.textContent = "No avatar";
+    avatar.appendChild(blankOpt);
+
+    // Build grouped options
+    const groups = {};
+    TEAM_AVATARS.forEach(opt => {
+      if (!opt.emoji) return; // already handled above
+      const g = opt.group || "Other";
+      if (!groups[g]) {
+        const og = document.createElement("optgroup");
+        og.label = g;
+        groups[g] = og;
+        avatar.appendChild(og);
+      }
+      const item = document.createElement("option");
+      item.value = opt.emoji;
+      item.textContent = `${opt.emoji} ${opt.label}`;
+      groups[g].appendChild(item);
+    });
+
+    avatar.value = draft.avatar !== undefined ? draft.avatar : "";
 
     const inp = document.createElement("input");
     inp.type = "text";
@@ -238,21 +322,71 @@ function renderTeamInputs() {
     inp.id = `tinp${i}`;
     inp.setAttribute("aria-label", `Team ${i + 1} name`);
 
-    const avatar = document.createElement("select");
-    avatar.className = "team-avatar-select";
-    avatar.id = `tavatar${i}`;
-    avatar.setAttribute("aria-label", `Team ${i + 1} avatar`);
-    TEAM_AVATARS.forEach(option => {
-      const item = document.createElement("option");
-      item.value = option.emoji;
-      item.textContent = option.emoji ? `${option.emoji} ${option.label}` : option.label;
-      avatar.appendChild(item);
-    });
-    avatar.value = draft.avatar || "";
+    topLine.appendChild(avatar);
+    topLine.appendChild(inp);
 
-    row.appendChild(sw);
-    row.appendChild(avatar);
-    row.appendChild(inp);
+    /* ── Color row: swatch + palette chips + custom picker ── */
+    const colorRow = document.createElement("div");
+    colorRow.className = "team-color-row";
+    colorRow.setAttribute("aria-label", `Team ${i + 1} color`);
+
+    // Label swatch (shows currently chosen color)
+    const swatchBtn = document.createElement("span");
+    swatchBtn.className = "team-swatch team-color-swatch-btn";
+    swatchBtn.style.background  = chosenColor;
+    swatchBtn.style.boxShadow   = `0 0 10px ${chosenColor}88`;
+    swatchBtn.title = "Current color";
+    swatchBtn.setAttribute("aria-hidden", "true");
+
+    // Palette chips
+    const palette = document.createElement("div");
+    palette.className = "team-color-palette";
+
+    function applyColor(color) {
+      row.dataset.chosenColor = color;
+      swatchBtn.style.background = color;
+      swatchBtn.style.boxShadow  = `0 0 10px ${color}88`;
+      customInput.value = color;
+      // Update focus ring on chips
+      palette.querySelectorAll(".color-chip").forEach(c => {
+        c.classList.toggle("selected", c.dataset.color === color);
+      });
+    }
+
+    TEAM_COLOR_PALETTE.forEach(hex => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "color-chip" + (hex === chosenColor ? " selected" : "");
+      chip.dataset.color = hex;
+      chip.style.background = hex;
+      chip.style.boxShadow  = `0 0 6px ${hex}66`;
+      chip.title = hex;
+      chip.setAttribute("aria-label", `Color ${hex}`);
+      chip.addEventListener("click", () => applyColor(hex));
+      palette.appendChild(chip);
+    });
+
+    // Custom color <input type="color">
+    const customInput = document.createElement("input");
+    customInput.type  = "color";
+    customInput.className = "team-color-custom";
+    customInput.value = chosenColor;
+    customInput.title = "Custom color";
+    customInput.setAttribute("aria-label", `Team ${i + 1} custom color`);
+    customInput.addEventListener("input", e => applyColor(e.target.value));
+
+    const customLabel = document.createElement("label");
+    customLabel.className = "team-color-custom-wrap";
+    customLabel.title = "Pick custom color";
+    customLabel.appendChild(customInput);
+    customLabel.insertAdjacentHTML("beforeend", `<span class="custom-color-icon" aria-hidden="true">🎨</span>`);
+
+    colorRow.appendChild(swatchBtn);
+    colorRow.appendChild(palette);
+    colorRow.appendChild(customLabel);
+
+    row.appendChild(topLine);
+    row.appendChild(colorRow);
     list.appendChild(row);
   }
 }
@@ -510,15 +644,18 @@ function bindSetup() {
 /* ── GAME START ─────────────────────────────── */
 function startGame() {
   state.teams = [];
+  const rows = $("teamsList").children;
   for (let i = 0; i < state.teamCount; i++) {
-    const inp = $(`tinp${i}`);
-    const nm = (inp && inp.value.trim()) ? inp.value.trim() : TEAM_DEFAULTS[i].name;
+    const inp    = $(`tinp${i}`);
+    const nm     = (inp && inp.value.trim()) ? inp.value.trim() : TEAM_DEFAULTS[i].name;
     const avatar = $(`tavatar${i}`);
+    const row    = rows[i];
+    const color  = (row && row.dataset.chosenColor) ? row.dataset.chosenColor : TEAM_DEFAULTS[i].color;
     state.teams.push({
-      name: nm,
+      name:   nm,
       avatar: avatar ? avatar.value : "",
-      color: TEAM_DEFAULTS[i].color,
-      score: 0
+      color,
+      score:  0
     });
   }
   state.deck = getShuffledDeck(state.category, state.cardLimit);
@@ -756,13 +893,15 @@ function buildScoreGrid() {
   state.teams.forEach((t, i) => {
     const card = document.createElement("div");
     card.className = "score-card";
+    card.style.setProperty("--team-color", t.color);
+    card.style.borderColor = `${t.color}44`;
 
     const info = document.createElement("div");
     info.className = "score-info";
 
     if (t.avatar) {
       const avatar = document.createElement("span");
-      avatar.className = "team-avatar";
+      avatar.className = "team-avatar team-avatar-colored";
       avatar.setAttribute("aria-hidden", "true");
       avatar.textContent = t.avatar;
       info.appendChild(avatar);
@@ -819,10 +958,11 @@ function renderHUD() {
   state.teams.forEach(t => {
     const chip = document.createElement("div");
     chip.className = "team-chip" + (t.score === max && max > 0 ? " leader" : "");
+    chip.style.setProperty("--team-color", t.color);
 
     if (t.avatar) {
       const avatar = document.createElement("span");
-      avatar.className = "team-avatar";
+      avatar.className = "team-avatar team-avatar-colored";
       avatar.setAttribute("aria-hidden", "true");
       avatar.textContent = t.avatar;
       chip.appendChild(avatar);
@@ -872,6 +1012,11 @@ function endGame() {
   sorted.forEach((t, i) => {
     const row = document.createElement("div");
     row.className = "podium-row" + (i === 0 ? " first" : "");
+    row.style.setProperty("--team-color", t.color);
+    if (i === 0) {
+      row.style.borderColor = `${t.color}88`;
+      row.style.boxShadow   = `0 0 24px ${t.color}44`;
+    }
 
     const rank = document.createElement("span");
     rank.className = "podium-rank";
@@ -882,7 +1027,7 @@ function endGame() {
 
     if (t.avatar) {
       const avatar = document.createElement("span");
-      avatar.className = "team-avatar";
+      avatar.className = "team-avatar team-avatar-colored";
       avatar.setAttribute("aria-hidden", "true");
       avatar.textContent = t.avatar;
       info.appendChild(avatar);
@@ -901,6 +1046,7 @@ function endGame() {
 
     const sc = document.createElement("span");
     sc.className = "podium-score";
+    sc.style.color = t.color;
     sc.textContent = `${t.score} pts`;
 
     row.appendChild(rank);

@@ -997,6 +997,106 @@ body.intro-splash-active .top-nav {
   box-shadow: 0 0 16px var(--orange-glow);
 }
 
+/* Stacked layout for team rows with color row */
+.team-row-stacked {
+  flex-direction: column;
+  align-items: stretch;
+  border-radius: var(--r-lg);
+  padding: 12px 14px 10px;
+  gap: 9px;
+}
+
+.team-row-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Team Color Row ── */
+.team-color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.team-color-palette {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.color-chip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform .18s var(--ease-spring), border-color .15s;
+  flex-shrink: 0;
+}
+
+.color-chip:hover {
+  transform: scale(1.22);
+}
+
+.color-chip.selected {
+  border-color: #fff;
+  transform: scale(1.28);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+/* Custom color input wrapper */
+.team-color-custom-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--surface-border);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  transition: background .18s;
+}
+
+.team-color-custom-wrap:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.team-color-custom {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.custom-color-icon {
+  font-size: .9rem;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* Color swatch dot in team row */
+.team-color-swatch-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+  transition: background .2s, box-shadow .2s;
+}
+
 .team-avatar-select {
   flex: 0 0 auto;
   max-width: 110px;
@@ -1118,6 +1218,12 @@ body.intro-splash-active .top-nav {
   flex: 0 0 auto;
   font-size: 1.15rem;
   line-height: 1;
+}
+
+/* Avatar with team color glow — used in HUD, score cards, podium */
+.team-avatar-colored {
+  filter: drop-shadow(0 0 5px var(--team-color, transparent));
+  transition: filter .25s;
 }
 
 /* Start section */
@@ -2305,6 +2411,19 @@ dialog::backdrop {
   .team-row {
     padding: 8px 12px;
     gap: 8px;
+  }
+
+  .team-row-stacked {
+    padding: 10px 12px 9px;
+  }
+
+  .team-color-palette {
+    gap: 4px;
+  }
+
+  .color-chip {
+    width: 20px;
+    height: 20px;
   }
 
   .team-avatar-select {
